@@ -35,6 +35,7 @@
     > python run.py
 2. gunicorn启动
     > gunicorn -b 0.0.0.0:80 --timeout 600 server:app
+3. celery启动
     > celery -A server.my_celery worker --loglevel=info
 
 ### 测试

@@ -1,0 +1,16 @@
+flask==1.0.2
+flask-restful==0.3.8
+click==7.1.2
+envparse==0.2.0
+gunicorn==20.0.4
+pymysql==0.10.0
+mongoengine~=0.20.0
+werkzeug~=1.0.1
+flask_mongoengine==0.9.5
+requests==2.24.0
+flask-cors==3.0.9
+boto3==1.14.48
+botocore==1.17.48
+flask-redis==0.4.0
+celery==5.0.1
+flask_log_request_id==0.10.1

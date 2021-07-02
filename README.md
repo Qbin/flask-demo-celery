@@ -3,6 +3,7 @@
 ### 环境
 1. python 3.7.6
 2. mongo 4.0
+3. redis 6.0
 
 ### 目录结构
     ```
@@ -30,7 +31,11 @@
     └── server.py   # gunicorn运行入口
     ```
 
-### 启动
+### 启动前准备
+1. 配置redis （config/config.py CELERY_BROKER_URL/result_backend/REDIS_URL）
+2. 配置mongo（config/config.py MONGODB_SETTINGS）
+
+### 启动(确保配置了redis和mongo)
 1. 单机启动
     > python run.py
 2. gunicorn启动

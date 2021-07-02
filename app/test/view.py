@@ -12,7 +12,7 @@ from app.test import test_bp
 from app.test.test_model import TestUser
 from app.celery_task import add
 from app.test.test_user_error import TestUserError
-from util.util import get_user_id
+# from util.util import get_user_id
 
 
 @test_bp.route('/', methods=['GET'])
@@ -75,23 +75,23 @@ def delete_user():
     return {"user_id": user.delete_user()}
 
 
-@test_bp.route('/list', methods=['GET'])
-# 用户登录校验装饰器
-@get_user_id
-def users_list():
-    # 查
-    params = request.args
-    page = params.get('page', 1, int)
-    per_page = params.get('rows', 10, int)
-
-    offset = (page - 1) * per_page
-    kwargs = {
-        'offset': offset,
-        'per_page': per_page,
-        'is_delete': False,
-    }
-    total, rows = TestUser.get_users(kwargs)
-    return {
-        'total': total,
-        'rows': rows
-    }
+# @test_bp.route('/list', methods=['GET'])
+# # 用户登录校验装饰器
+# @get_user_id
+# def users_list():
+#     # 查
+#     params = request.args
+#     page = params.get('page', 1, int)
+#     per_page = params.get('rows', 10, int)
+#
+#     offset = (page - 1) * per_page
+#     kwargs = {
+#         'offset': offset,
+#         'per_page': per_page,
+#         'is_delete': False,
+#     }
+#     total, rows = TestUser.get_users(kwargs)
+#     return {
+#         'total': total,
+#         'rows': rows
+#     }

@@ -11,7 +11,10 @@ from mongoengine import Document, StringField, IntField, BooleanField, ListField
 class Xwz(Document):
     episode = StringField(db_field="话数")
     jp_title = StringField(db_field="日文标题")
+    jp_title2 = StringField(db_field="日本标题")
     cn_title = StringField(db_field="台湾标题")
+    hk_title = StringField(db_field="香港标题")
+    hk_wip_title = StringField(db_field="香港标题 (WIP)")
     series = IntField(db_field="季")
     tags = ListField()
     tags_src = StringField()
@@ -49,11 +52,3 @@ class Xwz(Document):
             "标题": self.cn_title,
             "上下集": "上" if self.part == 0 else "下",
         }
-
-    @classmethod
-    def get_users(cls, kwargs):
-        offset = kwargs.pop("offset")
-        per_page = kwargs.pop("per_page")
-
-        objs = [obj.to_dict() for obj in cls.objects(**kwargs).order_by("-create_time").skip(offset).limit(per_page)]
-        return cls.objects(**kwargs).count(), objs

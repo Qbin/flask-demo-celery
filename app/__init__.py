@@ -6,8 +6,10 @@
 # @File    : __init__.py.py
 
 from app.test.view import test_bp
+from app.xwz.xwz_view import xwz_bp
 
 
 # register blueprint
 def register(app):
     app.register_blueprint(test_bp)
+    app.register_blueprint(xwz_bp)

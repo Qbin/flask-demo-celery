@@ -1,9 +1,11 @@
-flask==1.0.2
+flask==1.1.2
+markupsafe==2.0.1
 flask-restful==0.3.8
 click==7.1.2
 envparse==0.2.0
 gunicorn==20.0.4
 pymysql==0.10.0
+pymongo[srv]
 mongoengine~=0.20.0
 werkzeug~=1.0.1
 flask_mongoengine==0.9.5

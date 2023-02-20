@@ -36,7 +36,7 @@ def get_by_text(text):
 
 @xwz_bp.route('/text_key', methods=['POST'])
 def get_by_key():
-    params = request.form
+    params = request.json
     text = params.get("text_key", u"小丸子")
     info_list = Xwz.get_by_key(text)
     return {"result": [x.to_dict() for x in info_list]}

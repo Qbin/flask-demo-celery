@@ -47,8 +47,18 @@ class Xwz(Document):
     def to_dict(self):
         return {
             "id": self.str_id,
-            "话数": self.episode,
-            "季": self.series,
-            "标题": self.cn_title,
-            "上下集": "上" if self.part == 0 else "下",
+
+            # "话数": self.episode,
+            # "季": self.series,
+            # "标题": self.cn_title,
+            # "上下集": "上" if self.part == 0 else "下",
+            # "episode": self.episode,
+            # "series": self.series,
+            # "cn_title": self.cn_title,
+            # "part": self.part,
+
+            "sentence": self.episode,
+            "season": self.series,
+            "title": self.cn_title,
+            "part": "上" if self.part == 0 else "下",
         }

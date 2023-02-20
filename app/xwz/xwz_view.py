@@ -28,7 +28,15 @@ def index():
 
 
 @xwz_bp.route('/<text>', methods=['GET'])
-def get_by_key(text):
+def get_by_text(text):
     # text = None
     info_list = Xwz.get_by_key(text)
-    return {"结果": [x.to_dict() for x in info_list]}
+    return {"result": [x.to_dict() for x in info_list]}
+
+
+@xwz_bp.route('/text_key', methods=['POST'])
+def get_by_key():
+    params = request.form
+    text = params.get("text_key", u"小丸子")
+    info_list = Xwz.get_by_key(text)
+    return {"result": [x.to_dict() for x in info_list]}

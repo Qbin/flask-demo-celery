@@ -32,7 +32,7 @@ MODEL_KMEANS = os.path.join(DATA_PATH, "kmeans.model")
 
 # DataSet
 
-TRAIN_SETS = "1000.xlsx"  # 数据集存储位置
+TRAIN_SETS = "logs/1000.xlsx"  # 数据集存储位置
 
 # lda 词典
 DICT_NAME = get_tmpfile(os.path.join(DATA_PATH, "dictionary"))

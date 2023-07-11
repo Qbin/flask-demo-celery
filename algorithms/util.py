@@ -7,7 +7,7 @@ Create on 2020/9/4 2:22 下午
 """
 import re
 import pickle
-from config import *
+from algorithms.config import *
 
 stop_words = set([item.strip() for item in open(PATH_STOPWORDS, 'r').readlines()])
 

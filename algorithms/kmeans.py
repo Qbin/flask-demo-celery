@@ -13,7 +13,7 @@ from sklearn.cluster import MiniBatchKMeans, KMeans
 from sklearn import metrics
 import matplotlib.pyplot as plt
 
-from config import *
+from algorithms.config import *
 from common.time_cost import calculate_runtime
 
 
@@ -25,7 +25,7 @@ class KMEANS:
     km = None
     svd = None
 
-    def __init__(self, texts, num_clusters=10, minibatch=True, n_components=40,
+    def __init__(self, texts, num_clusters=10, minibatch=True, n_components=2,
                  n_features=250000, use_hashing=False, use_idf=True):
         """
         :param texts:           聚类文本

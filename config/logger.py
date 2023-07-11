@@ -14,7 +14,7 @@ def config_logger(enable_console_handler=True, enable_file_handler=True, log_fil
         'formatter': 'default',
         'level': log_level,
         'stream': 'ext://flask.logging.wsgi_errors_stream',
-        'filters': ['request_id']
+        # 'filters': ['request_id']
     }
     file_handler = {
         'class': 'logging.handlers.RotatingFileHandler',
@@ -23,13 +23,15 @@ def config_logger(enable_console_handler=True, enable_file_handler=True, log_fil
         'level': log_level,
         'maxBytes': log_file_max_bytes,
         'backupCount': log_file_max_count,
-        'filters': ['request_id']
+        # 'filters': ['request_id']
     }
     default_formatter = {
-        'format': "[%(asctime)s] [%(levelname)s] [%(filename)s:%(lineno)d] [request_id: %(request_id)s] %(message)s"
+        # 'format': "[%(asctime)s] [%(levelname)s] [%(filename)s:%(lineno)d] [request_id: %(request_id)s] %(message)s"
+        'format': "[%(asctime)s] [%(levelname)s] [%(filename)s:%(lineno)d]  %(message)s"
     }
     detail_formatter = {
-        'format': "[%(asctime)s] [%(levelname)s] [%(filename)s:%(lineno)d] [request_id: %(request_id)s] %(message)s"
+        # 'format': "[%(asctime)s] [%(levelname)s] [%(filename)s:%(lineno)d] [request_id: %(request_id)s] %(message)s"
+        'format': "[%(asctime)s] [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s"
     }
     handlers = []
     if enable_console_handler:
@@ -38,11 +40,11 @@ def config_logger(enable_console_handler=True, enable_file_handler=True, log_fil
         handlers.append('file')
     d = {
         'version': 1,
-        'filters': {
-            'request_id': {
-                '()': 'flask_log_request_id.RequestIDLogFilter'
-            }
-        },
+        # 'filters': {
+        #     'request_id': {
+        #         '()': 'flask_log_request_id.RequestIDLogFilter'
+        #     }
+        # },
         'formatters': {
             'default': default_formatter,
             'detail': detail_formatter

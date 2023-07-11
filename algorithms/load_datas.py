@@ -9,9 +9,9 @@ import gensim
 import pandas as pd
 import jieba
 import numpy as np
-from config import *
+from algorithms.config import *
 from common.time_cost import calculate_runtime
-from util import clear_character, drop_stopwords
+from algorithms.util import clear_character, drop_stopwords
 
 from multiprocessing import Pool
 

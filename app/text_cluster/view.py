@@ -5,10 +5,16 @@
 # @email   : qinbinbin@360.cn
 # @File    : view.py
 import logging
+import os.path
 
 from flask import request
 
+from algorithms.kmeans import KMEANS
+from algorithms.load_datas import Data
+from algorithms.util import load_texts, save_texts
 from app.text_cluster import text_cluster_bp
+
+TMP_DATA_PATH = "/Users/qinbinbin/Documents/project/flask-demo-celery/tmp_data"
 
 
 @text_cluster_bp.route('/', methods=['GET'])
@@ -24,6 +30,14 @@ def analyze_data():
 
     # todo 异步分词、保存数据
 
+    data = Data("logs/1000.xlsx")
+    if os.path.exists('{}_list.pkl'.format(a_id)):
+        base_texts = load_texts(a_id)
+        base_texts.extend(data.get_seg_corpus())
+        texts = base_texts
+    else:
+        texts = data.get_seg_corpus()
+    save_texts(texts, a_id)
     return {"a_id": a_id, "file": data_file.filename}
 
 
@@ -34,6 +48,13 @@ def gen_cluster():
     data_indexes = params.get("data_indexes", None)
 
     # todo 根据a_id和data_indexes获取数据
+    base_texts = load_texts(a_id)
+    corpus = [' '.join(base_texts[i]) for i in data_indexes]
+    kmeans = KMEANS(corpus, num_clusters=2)
+    model = kmeans.train()
+    # joblib.dump(model, MODEL_KMEANS)
+
+    kmeans.print_top_terms()
 
     # todo 将数据向量化后聚类
 

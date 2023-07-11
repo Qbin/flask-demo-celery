@@ -6,8 +6,10 @@
 # @File    : __init__.py.py
 
 from app.test.view import test_bp
+from app.text_cluster.view import text_cluster_bp
 
 
 # register blueprint
 def register(app):
     app.register_blueprint(test_bp)
+    app.register_blueprint(text_cluster_bp)

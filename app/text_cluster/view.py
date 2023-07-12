@@ -31,7 +31,7 @@ def analyze_data():
 
     # todo 异步分词、保存数据
 
-    data = Data("logs/1000.xlsx", field_name=field_name)
+    data = Data("logs/1k.xlsx", field_name=field_name)
     if os.path.exists('{}_list.pkl'.format(a_id)):
         base_texts = load_texts(a_id)
         base_texts.extend(data.get_seg_corpus())
@@ -50,6 +50,7 @@ def use_kmeans(corpus, cluster_params):
 
     # return kmeans.print_top_terms()
     X, centroids, labels = kmeans.draw()
+    kmeans.find_nearest_point()
     return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}
 
 

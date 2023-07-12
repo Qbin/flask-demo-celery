@@ -12,6 +12,7 @@ from sklearn.preprocessing import Normalizer
 from sklearn.cluster import MiniBatchKMeans, KMeans
 from sklearn import metrics
 import matplotlib.pyplot as plt
+import numpy as np
 
 from algorithms.config import *
 from common.time_cost import calculate_runtime
@@ -143,6 +144,20 @@ class KMEANS:
         # plt.scatter(centroids[:, 0], centroids[:, 1], marker='x', color='r')
         # plt.show()
         return X, centroids, labels
+
+    def find_nearest_point(self):
+        # 计算每个样本点到每个簇质心的距离
+        distances = self.km.transform(self.X)
+        labels = self.km.labels_
+        nearest_points = []
+        for i in range(self.km.n_clusters):
+            cluster_points = self.X[labels == i]
+            nearest_point_index = np.argmin(distances[labels == i, i])
+            nearest_point = cluster_points[nearest_point_index]
+            nearest_points.append(nearest_point)
+
+        print(nearest_points)
+        return nearest_points
 
     @calculate_runtime
     def find_optimal_clusters(self, max_k):

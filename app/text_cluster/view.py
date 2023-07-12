@@ -26,11 +26,12 @@ def index():
 def analyze_data():
     params = request.form
     a_id = params.get("a_id")
+    field_name = params.get("field_name")
     data_file = request.files.get("file")
 
     # todo 异步分词、保存数据
 
-    data = Data("logs/1000.xlsx")
+    data = Data("logs/1000.xlsx", field_name=field_name)
     if os.path.exists('{}_list.pkl'.format(a_id)):
         base_texts = load_texts(a_id)
         base_texts.extend(data.get_seg_corpus())
@@ -41,24 +42,33 @@ def analyze_data():
     return {"a_id": a_id, "file": data_file.filename}
 
 
+def use_kmeans(corpus, cluster_params):
+    kmeans = KMEANS(corpus, num_clusters=cluster_params.get("num_clusters"))
+    model = kmeans.train()
+    # joblib.dump(model, MODEL_KMEANS)
+    # todo 将数据向量化后聚类
+
+    # return kmeans.print_top_terms()
+    X, centroids, labels = kmeans.draw()
+    return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}
+
+
 @text_cluster_bp.route('/gen_cluster', methods=['POST'])
 def gen_cluster():
     params = request.json
     a_id = params.get("a_id")
     data_indexes = params.get("data_indexes", None)
+    cluster_type = params.get("cluster_type", "kmeans")
+    cluster_params = params.get("cluster_params", None)
 
     # todo 根据a_id和data_indexes获取数据
     base_texts = load_texts(a_id)
-    corpus = [' '.join(base_texts[i]) for i in data_indexes]
-    kmeans = KMEANS(corpus, num_clusters=2)
-    model = kmeans.train()
-    # joblib.dump(model, MODEL_KMEANS)
-
-    kmeans.print_top_terms()
-
-    # todo 将数据向量化后聚类
-
-    return {"a_id": a_id, "data_indexes": data_indexes}
+    if data_indexes:
+        corpus = [' '.join(base_texts[i]) for i in data_indexes]
+    else:
+        corpus = [' '.join(i) for i in base_texts]
+    if cluster_type == "kmeans":
+        return use_kmeans(corpus, cluster_params)
 
 
 @text_cluster_bp.route('/draw_cluster', methods=['POST'])

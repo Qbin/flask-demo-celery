@@ -7,7 +7,7 @@ Create on 2020/9/28 4:13 下午
 """
 from sklearn.pipeline import make_pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer, HashingVectorizer, TfidfTransformer
-from sklearn.decomposition import TruncatedSVD
+from sklearn.decomposition import TruncatedSVD, PCA
 from sklearn.preprocessing import Normalizer
 from sklearn.cluster import MiniBatchKMeans, KMeans
 from sklearn import metrics
@@ -95,11 +95,14 @@ class KMEANS:
                 order_centroids = self.km.cluster_centers_.argsort()[:, ::-1]
 
             terms = self.vectorizer.get_feature_names()
+            cluster_top_n = []
             for i in range(self.num_clusters):
                 res = []
                 for ind in order_centroids[i, :top_n]:
                     res.append(terms[ind])
                 logger.info("Cluster {}: {}".format(i, " ".join(res)))
+                cluster_top_n.append(res)
+            return {"cluster_top_n": cluster_top_n}
         else:
             logger.warning("hash 编码方式不支持该方法")
 
@@ -121,23 +124,25 @@ class KMEANS:
         logger.info(-self.km.score(self.X))
 
     def draw(self):
-
-        svd = TruncatedSVD(2)
-        # normalizer = Normalizer(copy=False)
-        # lsa = make_pipeline(svd, normalizer)
-        X = svd.fit_transform(self.X)
-        explained_variance = svd.explained_variance_ratio_.sum()
-        logger.info("Explained variance of the SVD step: {}%".format(int(explained_variance * 100)))
+        if self.X.shape[1] > 2:
+            pca = PCA(2)
+            # normalizer = Normalizer(copy=False)
+            # lsa = make_pipeline(svd, normalizer)
+            X = pca.fit_transform(self.X)
+            explained_variance = pca.explained_variance_ratio_.sum()
+            logger.info("Explained variance of the SVD step: {}%".format(int(explained_variance * 100)))
+        else:
+            X = self.X
 
         # 获取聚类中心和预测的标签
         centroids = self.km.cluster_centers_
         labels = self.km.labels_
-
-        # 绘制数据点和聚类中心
-        # plt.scatter(self.X[:, 0], self.X[:, 1], c=labels)
-        plt.scatter(X[:, 0], X[:, 1], c=labels)
-        plt.scatter(centroids[:, 0], centroids[:, 1], marker='x', color='r')
-        plt.show()
+        # # 绘制数据点和聚类中心
+        # # plt.scatter(self.X[:, 0], self.X[:, 1], c=labels)
+        # plt.scatter(X[:, 0], X[:, 1], c=labels)
+        # plt.scatter(centroids[:, 0], centroids[:, 1], marker='x', color='r')
+        # plt.show()
+        return X, centroids, labels
 
     @calculate_runtime
     def find_optimal_clusters(self, max_k):

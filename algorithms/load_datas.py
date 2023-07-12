@@ -104,7 +104,7 @@ class Data:
 
     """
 
-    def __init__(self, data_path=None, bigram=True, trigram=False):
+    def __init__(self, data_path=None, bigram=True, trigram=False, field_name=None):
         """
         加载处理数据集
         :param data_path:     数据集位置
@@ -118,16 +118,18 @@ class Data:
         self.train_st_text = None
         self.bigram_mod = None
         self.trigram_mod = None
+        self.field_name = field_name
 
     @calculate_runtime
     def load_data(self):
         """ 加载数据集，假设数据集有两列，分别是人工标注的标签列和数据列 """
         src_df = pd.read_excel(self.data_path, engine='openpyxl', )
 
-        self.df = src_df[[u"正文"]].rename(columns={"正文": "data"})
-        newdf = pd.DataFrame(np.repeat(self.df.values, 1, axis=0))
-        newdf.columns = self.df.columns
-        self.df = newdf
+        self.df = src_df[[self.field_name]].rename(columns={self.field_name: "data"})
+        # newdf = pd.DataFrame(np.repeat(self.df.values, 1, axis=0))
+        # newdf.columns = self.df.columns
+        # self.df = newdf
+
         # self.df = pd.read_csv(self.data_path, delimiter="\t", header=None, names=["label", "data"])
         # logger.info("已加载数据集，原标注数据集具有以下 label：{}".format(",".join(self.df.label.unique())))
 

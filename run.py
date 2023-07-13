@@ -13,7 +13,7 @@ from celery_extensions import my_celery
 
 @click.command()
 @click.option('-h', '--host', help='Bind host', default='localhost', show_default=True)
-@click.option('-p', '--port', help='Bind port', default=8000, type=int, show_default=True)
+@click.option('-p', '--port', help='Bind port', default=8888, type=int, show_default=True)
 @click.option('-e', '--env', help='Running env, override environment FLASK_ENV.', default='development',
               show_default=True)
 @click.option('-f', '--env-file', help='Environment from file', type=click.Path(exists=True))

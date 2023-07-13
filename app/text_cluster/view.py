@@ -9,10 +9,9 @@ import os.path
 
 from flask import request
 
-from algorithms.kmeans import KMEANS
-from algorithms.load_datas import Data
 from algorithms.util import load_texts, save_texts
 from app.text_cluster import text_cluster_bp
+from app.text_cluster.text_cluster_controller import TextClusterController
 
 TMP_DATA_PATH = "/Users/qinbinbin/Documents/project/flask-demo-celery/tmp_data"
 
@@ -30,15 +29,9 @@ def analyze_data():
     data_file = request.files.get("file")
 
     # todo 异步分词、保存数据
+    tcc = TextClusterController()
+    tcc.analyze_data(data_file, field_name)
 
-    data = Data("logs/1k.xlsx", field_name=field_name)
-    if os.path.exists('{}_list.pkl'.format(a_id)):
-        base_texts = load_texts(a_id)
-        base_texts.extend(data.get_seg_corpus())
-        texts = base_texts
-    else:
-        texts = data.get_seg_corpus()
-    save_texts(texts, a_id)
     return {"a_id": a_id, "file": data_file.filename}
 
 

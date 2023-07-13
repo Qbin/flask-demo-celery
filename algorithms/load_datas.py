@@ -135,7 +135,7 @@ class Data:
 
     @calculate_runtime
     def data_cut(self, datas=None):
-        if not datas:
+        if datas.empty:
             datas = self.df["data"]
         logger.info("对数据集进行清洗并分词，请稍后 ...")
         train_clean = [clear_character(data) for data in datas]

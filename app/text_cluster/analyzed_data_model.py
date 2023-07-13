@@ -6,6 +6,7 @@
 # @File    : test_model.py
 
 from mongoengine import Document, StringField, IntField, ListField
+from pymongo import UpdateOne
 
 
 class AnalyzedData(Document):
@@ -16,9 +17,22 @@ class AnalyzedData(Document):
     def batch_insert(cls, documents):
         cls.objects.insert(documents)
 
+    # @classmethod
+    # def batch_insert(cls, documents):
+    #     bulk_operations = []
+    #     for document in documents:
+    #         data_id = document['data_id']
+    #         operation = UpdateOne({'data_id': data_id}, {'$set': document}, upsert=True)
+    #         bulk_operations.append(operation)
+    #
+    #     cls.objects.insert(bulk_operations)
+
     @classmethod
     def batch_find_by_ids(cls, id_list):
-        return cls.objects(data_id__in=id_list)
+        if id_list:
+            return cls.objects(data_id__in=id_list)
+        else:
+            return cls.objects()
 
 
 # 示例用法

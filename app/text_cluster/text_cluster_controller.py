@@ -11,6 +11,7 @@ import pandas as pd
 from algorithms.kmeans import KMEANS
 from algorithms.load_datas import Data
 from app.text_cluster.analyzed_data_model import AnalyzedData
+from common.time_cost import calculate_runtime
 
 
 class TextClusterController:
@@ -31,13 +32,36 @@ class TextClusterController:
         return src_df[field_name]
 
     def insert_2_db(self, texts):
-        documents = [AnalyzedData(data_id=data_id, analyzed_data=[text]) for data_id, text in zip(self.indexes, texts)]
+        documents = [AnalyzedData(data_id=data_id, analyzed_data=text) for data_id, text in zip(self.indexes, texts)]
 
         # 批量插入文档
         AnalyzedData.batch_insert(documents)
+
+    @calculate_runtime
+    def get_analyzed_data(self, data_indexes):
+        query_set = AnalyzedData.batch_find_by_ids(data_indexes)
+        return [i.analyzed_data for i in query_set]
 
     def analyze_data(self, file: io.BytesIO, field_name: str):
         df = self.load_data(file, field_name)
         data = Data()
         texts = data.get_seg_corpus(df)
         self.insert_2_db(texts)
+
+    def gen_cluster(self, data_indexes, cluster_type, cluster_params):
+        texts = self.get_analyzed_data(data_indexes)
+        corpus = [' '.join(i) for i in texts]
+        if cluster_type == "kmeans":
+            return use_kmeans(corpus, cluster_params)
+
+
+def use_kmeans(corpus, cluster_params):
+    kmeans = KMEANS(corpus, num_clusters=cluster_params.get("num_clusters"))
+    model = kmeans.train()
+    # joblib.dump(model, MODEL_KMEANS)
+    # todo 将数据向量化后聚类
+
+    # return kmeans.print_top_terms()
+    X, centroids, labels = kmeans.draw()
+    kmeans.find_nearest_point()
+    return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}

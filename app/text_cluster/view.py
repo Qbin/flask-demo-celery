@@ -35,18 +35,6 @@ def analyze_data():
     return {"a_id": a_id, "file": data_file.filename}
 
 
-def use_kmeans(corpus, cluster_params):
-    kmeans = KMEANS(corpus, num_clusters=cluster_params.get("num_clusters"))
-    model = kmeans.train()
-    # joblib.dump(model, MODEL_KMEANS)
-    # todo 将数据向量化后聚类
-
-    # return kmeans.print_top_terms()
-    X, centroids, labels = kmeans.draw()
-    kmeans.find_nearest_point()
-    return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}
-
-
 @text_cluster_bp.route('/gen_cluster', methods=['POST'])
 def gen_cluster():
     params = request.json
@@ -56,13 +44,8 @@ def gen_cluster():
     cluster_params = params.get("cluster_params", None)
 
     # todo 根据a_id和data_indexes获取数据
-    base_texts = load_texts(a_id)
-    if data_indexes:
-        corpus = [' '.join(base_texts[i]) for i in data_indexes]
-    else:
-        corpus = [' '.join(i) for i in base_texts]
-    if cluster_type == "kmeans":
-        return use_kmeans(corpus, cluster_params)
+    tcc = TextClusterController()
+    return tcc.gen_cluster(data_indexes, cluster_type, cluster_params)
 
 
 @text_cluster_bp.route('/draw_cluster', methods=['POST'])

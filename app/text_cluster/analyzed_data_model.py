@@ -6,7 +6,8 @@
 # @File    : test_model.py
 
 from mongoengine import Document, StringField, IntField, ListField
-from pymongo import UpdateOne
+
+from common.time_cost import calculate_runtime
 
 
 class AnalyzedData(Document):
@@ -28,9 +29,11 @@ class AnalyzedData(Document):
     #     cls.objects.insert(bulk_operations)
 
     @classmethod
+    @calculate_runtime
     def batch_find_by_ids(cls, id_list):
         if id_list:
             return cls.objects(data_id__in=id_list)
+            # return cls.objects(data_id__in=id_list).only("analyzed_data")
         else:
             return cls.objects()
 

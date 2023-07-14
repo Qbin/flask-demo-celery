@@ -64,7 +64,7 @@ class TextClusterController:
         df = self.load_data(file, field_name)
         data = Data()
         texts = data.get_seg_corpus(df)
-        self.insert_2_db(texts)
+        self.insert_texts_2_db(texts)
 
     def use_kmeans(self, corpus, cluster_params):
         kmeans = KMEANS(corpus, num_clusters=cluster_params.get("num_clusters"))
@@ -73,7 +73,7 @@ class TextClusterController:
         # todo 将数据向量化后聚类
         nearest_points = kmeans.find_nearest_point()
 
-        return {"model_id": model_id, "nearest_points": nearest_points}
+        return {"model_id": model_id, "nearest_points": nearest_points}, kmeans
 
         # return kmeans.print_top_terms()
         # X, centroids, labels = kmeans.draw()
@@ -85,11 +85,11 @@ class TextClusterController:
         if cluster_type == "kmeans":
             return self.use_kmeans(corpus, cluster_params)
 
-    def draw_cluster(self, data_indexes, model_name):
-        texts = self.get_analyzed_data(data_indexes)
-        corpus = [' '.join(i.analyzed_data) for i in texts]
-        model_file_name = os.path.join(current_app.root_path, "model", model_name)
-        model = joblib.load(model_file_name)
-        kmeans = KMEANS(corpus, num_clusters=2)
-        X, centroids, labels = kmeans.draw(model)
+    def draw_cluster(self, model_id):
+        model_obj = ClusterModels.get_by_id(model_id)
+        data_indexes = model_obj.data_indexes
+        model_params = model_obj.model_params
+        model_type = model_obj.model_type
+        _, kmeans = self.gen_cluster(data_indexes, model_type, model_params)
+        X, centroids, labels = kmeans.draw()
         return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}

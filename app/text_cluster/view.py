@@ -48,7 +48,8 @@ def gen_cluster():
 
     # todo 根据a_id和data_indexes获取数据
     tcc = TextClusterController()
-    return tcc.gen_cluster(data_indexes, cluster_type, cluster_params)
+    result, _ = tcc.gen_cluster(data_indexes, cluster_type, cluster_params)
+    return result
 
 
 @text_cluster_bp.route('/draw_cluster', methods=['POST'])
@@ -56,8 +57,7 @@ def draw_cluster():
     # todo 增加距离质点最近的数据id
     # todo 校验model和data_indexes的匹配度
     params = request.json
-    data_indexes = params.get("data_indexes", None)
-    model_name = params.get("model_name")
+    model_id = params.get("model_id")
 
     tcc = TextClusterController()
-    return tcc.draw_cluster(data_indexes, model_name)
+    return tcc.draw_cluster(model_id)

@@ -5,7 +5,7 @@
 # @email   : qinbinbin@360.cn
 # @File    : test_model.py
 
-from mongoengine import Document, StringField, IntField, ListField
+from mongoengine import Document, StringField, ListField
 
 from common.time_cost import calculate_runtime
 

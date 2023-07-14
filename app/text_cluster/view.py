@@ -23,8 +23,10 @@ def index():
 
 @text_cluster_bp.route('/analyze_data', methods=['POST'])
 def analyze_data():
+    # todo 接口加锁
+    # todo 支持数据批量覆盖
     params = request.form
-    a_id = params.get("a_id")
+    # a_id = params.get("a_id")
     field_name = params.get("field_name")
     data_file = request.files.get("file")
 
@@ -32,11 +34,12 @@ def analyze_data():
     tcc = TextClusterController()
     tcc.analyze_data(data_file, field_name)
 
-    return {"a_id": a_id, "file": data_file.filename}
+    return {"field_name": field_name, "file": data_file.filename}
 
 
 @text_cluster_bp.route('/gen_cluster', methods=['POST'])
 def gen_cluster():
+    # todo 响应时间过长
     params = request.json
     a_id = params.get("a_id")
     data_indexes = params.get("data_indexes", None)
@@ -50,11 +53,11 @@ def gen_cluster():
 
 @text_cluster_bp.route('/draw_cluster', methods=['POST'])
 def draw_cluster():
+    # todo 增加距离质点最近的数据id
+    # todo 校验model和data_indexes的匹配度
     params = request.json
     data_indexes = params.get("data_indexes", None)
     model_name = params.get("model_name")
 
-    # todo 根据a_id获取聚类模型和数据
     tcc = TextClusterController()
     return tcc.draw_cluster(data_indexes, model_name)
-

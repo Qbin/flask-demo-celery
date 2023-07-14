@@ -39,6 +39,7 @@ class TextClusterController:
         return src_df[field_name]
 
     def insert_texts_2_db(self, texts):
+        # todo 如果data_id已存在，则覆盖
         documents = [AnalyzedData(data_id=data_id, analyzed_data=text) for data_id, text in zip(self.indexes, texts)]
 
         # 批量插入文档
@@ -75,9 +76,11 @@ class TextClusterController:
             kmeans = KMEANS(corpus, num_clusters=cluster_params.get("num_clusters"), is_draw=self.is_draw)
         model = kmeans.train()
         model_id = self.save_model(model, cluster_params)
-        # todo 将数据向量化后聚类
+        # kmeans.print_top_terms()
         nearest_points = None
         # nearest_points = kmeans.find_nearest_point()
+        # todo 待完善
+        kmeans.find_n()
 
         return {"model_id": model_id, "nearest_points": nearest_points}, kmeans
 

@@ -25,9 +25,10 @@ class KMEANS:
     X = None
     km = None
     svd = None
+    is_draw = False
 
-    def __init__(self, texts, num_clusters=10, minibatch=True, n_components=2,
-                 n_features=250000, use_hashing=False, use_idf=True):
+    def __init__(self, texts, num_clusters=10, minibatch=True, n_components=100,
+                 n_features=250000, use_hashing=False, use_idf=True, is_draw=False):
         """
         :param texts:           聚类文本
         :param num_clusters:    聚类数
@@ -44,6 +45,7 @@ class KMEANS:
         self.n_features = n_features
         self.use_hashing = use_hashing
         self.use_idf = use_idf
+        self.is_draw = is_draw
         self.text2vec()
 
     @calculate_runtime
@@ -68,7 +70,10 @@ class KMEANS:
             # not normalized, we have to redo the normalization.
             self.svd = TruncatedSVD(self.n_components)
             normalizer = Normalizer(copy=False)
-            lsa = make_pipeline(self.svd, normalizer)
+            if self.is_draw:
+                lsa = make_pipeline(self.svd)
+            else:
+                lsa = make_pipeline(self.svd, normalizer)
             self.X = lsa.fit_transform(self.X)
             explained_variance = self.svd.explained_variance_ratio_.sum()
             logger.info("Explained variance of the SVD step: {}%".format(int(explained_variance * 100)))
@@ -124,30 +129,23 @@ class KMEANS:
         logger.info(dict([(i, result.count(i)) for i in result]))
         logger.info(-self.km.score(self.X))
 
-    def draw(self, km_model=None):
-        if km_model:
-            model = km_model
-        else:
-            model = self.km
-        if self.X.shape[1] > 2:
-            pca = PCA(2)
-            # normalizer = Normalizer(copy=False)
-            # lsa = make_pipeline(svd, normalizer)
-            X = pca.fit_transform(self.X)
-            explained_variance = pca.explained_variance_ratio_.sum()
-            logger.info("Explained variance of the SVD step: {}%".format(int(explained_variance * 100)))
-        else:
-            X = self.X
+    def draw(self):
+        # if self.X.shape[1] >= 2:
+        #     pca = PCA(2)
+        #     # normalizer = Normalizer(copy=False)
+        #     # lsa = make_pipeline(svd, normalizer)
+        #     self.X = pca.fit_transform(self.X)
+        #     explained_variance = pca.explained_variance_ratio_.sum()
+        #     logger.info("Explained variance of the SVD step: {}%".format(int(explained_variance * 100)))
 
         # 获取聚类中心和预测的标签
-        centroids = model.cluster_centers_
-        labels = model.labels_
+        centroids = self.km.cluster_centers_
+        labels = self.km.labels_
         # # 绘制数据点和聚类中心
-        # # plt.scatter(self.X[:, 0], self.X[:, 1], c=labels)
-        # plt.scatter(X[:, 0], X[:, 1], c=labels)
-        # plt.scatter(centroids[:, 0], centroids[:, 1], marker='x', color='r')
-        # plt.show()
-        return X, centroids, labels
+        plt.scatter(self.X[:, 0], self.X[:, 1], c=labels)
+        plt.scatter(centroids[:, 0], centroids[:, 1], marker='x', color='r')
+        plt.show()
+        return self.X, centroids, labels
 
     def find_nearest_point(self):
         # 计算每个样本点到每个簇质心的距离

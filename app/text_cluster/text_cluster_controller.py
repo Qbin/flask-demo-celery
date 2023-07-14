@@ -24,6 +24,7 @@ class TextClusterController:
     # df: pd.DataFrame = None
     # field_name: str = None
     indexes: list = []
+    is_draw: bool = False
 
     def __init__(self):
         pass
@@ -67,11 +68,16 @@ class TextClusterController:
         self.insert_texts_2_db(texts)
 
     def use_kmeans(self, corpus, cluster_params):
-        kmeans = KMEANS(corpus, num_clusters=cluster_params.get("num_clusters"))
+        if self.is_draw:
+            kmeans = KMEANS(corpus, num_clusters=cluster_params.get("num_clusters"), n_components=2,
+                            is_draw=self.is_draw)
+        else:
+            kmeans = KMEANS(corpus, num_clusters=cluster_params.get("num_clusters"), is_draw=self.is_draw)
         model = kmeans.train()
         model_id = self.save_model(model, cluster_params)
         # todo 将数据向量化后聚类
-        nearest_points = kmeans.find_nearest_point()
+        nearest_points = None
+        # nearest_points = kmeans.find_nearest_point()
 
         return {"model_id": model_id, "nearest_points": nearest_points}, kmeans
 
@@ -86,6 +92,7 @@ class TextClusterController:
             return self.use_kmeans(corpus, cluster_params)
 
     def draw_cluster(self, model_id):
+        self.is_draw = True
         model_obj = ClusterModels.get_by_id(model_id)
         data_indexes = model_obj.data_indexes
         model_params = model_obj.model_params

@@ -5,8 +5,13 @@
 # @email   : qinbinbin@360.cn
 # @File    : text_cluster_controller.py
 import io
+import os
+import uuid
 
+import joblib
 import pandas as pd
+
+from flask import current_app
 
 from algorithms.kmeans import KMEANS
 from algorithms.load_datas import Data
@@ -40,7 +45,7 @@ class TextClusterController:
     @calculate_runtime
     def get_analyzed_data(self, data_indexes):
         query_set = AnalyzedData.batch_find_by_ids(data_indexes)
-        return [i.analyzed_data for i in query_set]
+        return query_set
 
     def analyze_data(self, file: io.BytesIO, field_name: str):
         df = self.load_data(file, field_name)
@@ -50,7 +55,7 @@ class TextClusterController:
 
     def gen_cluster(self, data_indexes, cluster_type, cluster_params):
         texts = self.get_analyzed_data(data_indexes)
-        corpus = [' '.join(i) for i in texts]
+        corpus = [' '.join(i.analyzed_data) for i in texts]
         if cluster_type == "kmeans":
             return use_kmeans(corpus, cluster_params)
 
@@ -58,10 +63,14 @@ class TextClusterController:
 def use_kmeans(corpus, cluster_params):
     kmeans = KMEANS(corpus, num_clusters=cluster_params.get("num_clusters"))
     model = kmeans.train()
-    # joblib.dump(model, MODEL_KMEANS)
+    model_name = "{}_kmeans.model".format(uuid.uuid4())
+    model_file_name = os.path.join(current_app.root_path, "model", model_name)
+    joblib.dump(model, model_file_name)
     # todo 将数据向量化后聚类
+    nearest_points = kmeans.find_nearest_point()
+
+    return {"model_name": model_name, "nearest_points": nearest_points}
 
     # return kmeans.print_top_terms()
-    X, centroids, labels = kmeans.draw()
-    kmeans.find_nearest_point()
-    return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}
+    # X, centroids, labels = kmeans.draw()
+    # return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}

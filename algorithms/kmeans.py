@@ -154,7 +154,7 @@ class KMEANS:
             cluster_points = self.X[labels == i]
             nearest_point_index = np.argmin(distances[labels == i, i])
             nearest_point = cluster_points[nearest_point_index]
-            nearest_points.append(nearest_point)
+            nearest_points.append(nearest_point.tolist())
 
         print(nearest_points)
         return nearest_points

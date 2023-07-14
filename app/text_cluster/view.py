@@ -51,11 +51,10 @@ def gen_cluster():
 @text_cluster_bp.route('/draw_cluster', methods=['POST'])
 def draw_cluster():
     params = request.json
-    a_id = params.get("a_id")
     data_indexes = params.get("data_indexes", None)
+    model_name = params.get("model_name")
 
     # todo 根据a_id获取聚类模型和数据
+    tcc = TextClusterController()
+    return tcc.draw_cluster(data_indexes, model_name)
 
-    # todo 返回画图数据
-
-    return {"a_id": a_id, "data_indexes": data_indexes}

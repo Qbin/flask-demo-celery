@@ -59,6 +59,15 @@ class TextClusterController:
         if cluster_type == "kmeans":
             return use_kmeans(corpus, cluster_params)
 
+    def draw_cluster(self, data_indexes, model_name):
+        texts = self.get_analyzed_data(data_indexes)
+        corpus = [' '.join(i.analyzed_data) for i in texts]
+        model_file_name = os.path.join(current_app.root_path, "model", model_name)
+        model = joblib.load(model_file_name)
+        kmeans = KMEANS(corpus, num_clusters=2)
+        X, centroids, labels = kmeans.draw(model)
+        return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}
+
 
 def use_kmeans(corpus, cluster_params):
     kmeans = KMEANS(corpus, num_clusters=cluster_params.get("num_clusters"))

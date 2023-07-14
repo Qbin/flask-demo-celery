@@ -124,7 +124,11 @@ class KMEANS:
         logger.info(dict([(i, result.count(i)) for i in result]))
         logger.info(-self.km.score(self.X))
 
-    def draw(self):
+    def draw(self, km_model=None):
+        if km_model:
+            model = km_model
+        else:
+            model = self.km
         if self.X.shape[1] > 2:
             pca = PCA(2)
             # normalizer = Normalizer(copy=False)
@@ -136,8 +140,8 @@ class KMEANS:
             X = self.X
 
         # 获取聚类中心和预测的标签
-        centroids = self.km.cluster_centers_
-        labels = self.km.labels_
+        centroids = model.cluster_centers_
+        labels = model.labels_
         # # 绘制数据点和聚类中心
         # # plt.scatter(self.X[:, 0], self.X[:, 1], c=labels)
         # plt.scatter(X[:, 0], X[:, 1], c=labels)

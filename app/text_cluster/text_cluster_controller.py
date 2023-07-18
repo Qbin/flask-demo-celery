@@ -80,7 +80,7 @@ class TextClusterController:
         nearest_points = None
         # nearest_points = kmeans.find_nearest_point()
         # todo 待完善
-        kmeans.find_n()
+        # kmeans.find_n()
 
         return {"model_id": model_id, "nearest_points": nearest_points}, kmeans
 

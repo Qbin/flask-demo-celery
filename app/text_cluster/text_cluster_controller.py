@@ -13,6 +13,7 @@ import pandas as pd
 
 from flask import current_app
 
+from algorithms.dbscan import Dbscan
 from algorithms.kmeans import KMEANS
 from algorithms.load_datas import Data
 from app.text_cluster.analyzed_data_model import AnalyzedData
@@ -49,8 +50,8 @@ class TextClusterController:
         model = ClusterModels.add_model(data_indexes=self.indexes, model_type=model_type, model_params=model_params)
         return model.str_id
 
-    def save_model(self, model, cluster_params):
-        model_id = self.insert_model_2_db("kmeans", cluster_params)
+    def save_model(self, model, cluster_params, cluster_type="kmeans"):
+        model_id = self.insert_model_2_db(cluster_type, cluster_params)
         model_name = "{}.model".format(model_id)
         model_file_name = os.path.join(current_app.root_path, "model", model_name)
         joblib.dump(model, model_file_name)
@@ -88,11 +89,29 @@ class TextClusterController:
         # X, centroids, labels = kmeans.draw()
         # return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}
 
+    def use_dbscan(self, corpus, cluster_params):
+        dbscan = Dbscan(corpus, eps=cluster_params.get("eps", 0.5), min_samples=cluster_params.get("min_samples", 2))
+        model = dbscan.train()
+        model_id = self.save_model(model, cluster_params, "dbscan")
+        # kmeans.print_top_terms()
+        nearest_points = None
+        # nearest_points = kmeans.find_nearest_point()
+        # todo 待完善
+        # kmeans.find_n()
+
+        return {"model_id": model_id, "nearest_points": nearest_points}, dbscan
+
+        # return kmeans.print_top_terms()
+        # X, centroids, labels = kmeans.draw()
+        # return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}
+
     def gen_cluster(self, data_indexes, cluster_type, cluster_params):
         texts = self.get_analyzed_data(data_indexes)
         corpus = [' '.join(i.analyzed_data) for i in texts]
         if cluster_type == "kmeans":
             return self.use_kmeans(corpus, cluster_params)
+        elif cluster_type == "dbscan":
+            return self.use_dbscan(corpus, cluster_params)
 
     def draw_cluster(self, model_id):
         self.is_draw = True
@@ -102,4 +121,7 @@ class TextClusterController:
         model_type = model_obj.model_type
         _, kmeans = self.gen_cluster(data_indexes, model_type, model_params)
         X, centroids, labels = kmeans.draw()
-        return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}
+        try:
+            return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}
+        except:
+            return {"X": X.tolist(), "centroids": "", "labels": labels.tolist()}

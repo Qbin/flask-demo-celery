@@ -41,7 +41,8 @@ class TextClusterController:
 
     def insert_texts_2_db(self, texts):
         # todo 如果data_id已存在，则覆盖
-        documents = [AnalyzedData(data_id=data_id, analyzed_data=text) for data_id, text in zip(self.indexes, texts)]
+        # 为确保id的类型一致，这里强制转成string
+        documents = [AnalyzedData(data_id=str(data_id), analyzed_data=text) for data_id, text in zip(self.indexes, texts)]
 
         # 批量插入文档
         AnalyzedData.batch_insert(documents)

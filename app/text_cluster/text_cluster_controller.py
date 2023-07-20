@@ -42,7 +42,8 @@ class TextClusterController:
     def insert_texts_2_db(self, texts):
         # todo 如果data_id已存在，则覆盖
         # 为确保id的类型一致，这里强制转成string
-        documents = [AnalyzedData(data_id=str(data_id), analyzed_data=text) for data_id, text in zip(self.indexes, texts)]
+        documents = [AnalyzedData(data_id=str(data_id), analyzed_data=text) for data_id, text in
+                     zip(self.indexes, texts)]
 
         # 批量插入文档
         AnalyzedData.batch_insert(documents)
@@ -79,10 +80,7 @@ class TextClusterController:
         model = kmeans.train()
         model_id = self.save_model(model, cluster_params)
         # kmeans.print_top_terms()
-        nearest_points = None
-        # nearest_points = kmeans.find_nearest_point()
-        # todo 待完善
-        # kmeans.find_n()
+        nearest_points = kmeans.find_closest_samples()
 
         return {"model_id": model_id, "nearest_points": nearest_points}, kmeans
 

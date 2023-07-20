@@ -11,6 +11,7 @@ from sklearn.decomposition import TruncatedSVD, PCA
 from sklearn.preprocessing import Normalizer
 from sklearn.cluster import MiniBatchKMeans, KMeans
 from sklearn import metrics
+from sklearn.metrics.pairwise import euclidean_distances
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -147,21 +148,22 @@ class KMEANS:
         plt.show()
         return self.X, centroids, labels
 
-    def find_n(self):
-        # todo 待完善
-        X = self.texts
-        distances = self.X
-        kmeans = self.km
-        labels = self.km.labels_
-        # 找出距离质心最近的点在原始数据中的索引
-        closest_indices = np.argmin(distances, axis=0)
+    def find_closest_samples(self):
+        # 获取每个簇的中心点
+        cluster_centers = self.km.cluster_centers_
 
-        # 输出每个簇中距离质心最近的点的索引和对应的数据点
-        for i in range(kmeans.n_clusters):
-            cluster_points = X[labels == i]
-            closest_index = np.where(labels == i)[0][closest_indices[i]]
-            closest_point = cluster_points[closest_indices[i]]
-            print("Cluster {}: Closest point index = {}, Closest point = {}".format(i, closest_index, closest_point))
+        # 计算每个簇中心点与所有样本之间的距离
+        distances = euclidean_distances(self.X, cluster_centers)
+
+        # 找到每个簇中心点最近的样本
+        closest_samples = np.argmin(distances, axis=0)
+
+        # # 输出结果
+        # for i, sample_index in enumerate(closest_samples):
+        #     print("Cluster center:", cluster_centers[i])
+        #     print("Closest sample:", self.X[sample_index])
+        #     print()
+        return closest_samples.tolist()
 
     def find_nearest_point(self):
         # 计算每个样本点到每个簇质心的距离

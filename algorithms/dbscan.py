@@ -104,6 +104,7 @@ class Dbscan:
     def draw(self):
         # Get cluster labels
         labels = self.dbscan.labels_
+        # return self.dbscan.components_, "xxx", labels
 
         # Get core samples mask
         core_samples_mask = np.zeros_like(labels, dtype=bool)
@@ -134,7 +135,7 @@ class Dbscan:
         plt.legend()
         plt.show()
 
-        return self.X, "xxx", labels
+        return self.dbscan.components_, "xxx", labels
 
     def find_n(self):
         # todo 待完善

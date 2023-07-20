@@ -118,9 +118,12 @@ class TextClusterController:
         data_indexes = model_obj.data_indexes
         model_params = model_obj.model_params
         model_type = model_obj.model_type
-        _, kmeans = self.gen_cluster(data_indexes, model_type, model_params)
-        X, centroids, labels = kmeans.draw()
-        try:
+        if model_type == "kmeans":
+            _, kmeans = self.gen_cluster(data_indexes, model_type, model_params)
+            X, centroids, labels = kmeans.draw()
             return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}
-        except:
-            return {"X": X.tolist(), "centroids": "", "labels": labels.tolist()}
+        else:
+            model_name = "{}.model".format(model_id)
+            model_file_name = os.path.join(current_app.root_path, "model", model_name)
+            model = joblib.load(model_file_name)
+            return {"X": model.components_.tolist(), "model_params": model_params, "labels": model.labels_.tolist()}

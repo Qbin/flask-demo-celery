@@ -8,12 +8,13 @@ import logging
 import os.path
 
 from flask import request
+from threading import Lock
 
-from algorithms.util import load_texts, save_texts
 from app.text_cluster import text_cluster_bp
+from app.text_cluster.cluster_error import ClusterError
 from app.text_cluster.text_cluster_controller import TextClusterController
 
-TMP_DATA_PATH = "/Users/qinbinbin/Documents/project/flask-demo-celery/tmp_data"
+lock = Lock()
 
 
 @text_cluster_bp.route('/', methods=['GET'])
@@ -24,17 +25,30 @@ def index():
 @text_cluster_bp.route('/analyze_data', methods=['POST'])
 def analyze_data():
     # todo 接口加锁
-    # todo 支持数据批量覆盖
     params = request.form
     # a_id = params.get("a_id")
     field_name = params.get("field_name")
     data_file = request.files.get("file")
 
-    # todo 异步分词、保存数据
-    tcc = TextClusterController()
-    tcc.analyze_data(data_file, field_name)
+    # 判断互斥锁是否已被持有
+    if lock.locked():
+        raise ClusterError(ClusterError.SERVER_BUSY, '服务繁忙')
 
-    return {"field_name": field_name, "file": data_file.filename}
+    acquired = lock.acquire(blocking=False)
+
+    if acquired:
+        try:
+            # todo 异步分词、保存数据
+            tcc = TextClusterController()
+            tcc.analyze_data(data_file, field_name)
+            return {"field_name": field_name, "file": data_file.filename}
+        except Exception as e:
+            logging.exception(e)
+            raise e
+        finally:
+            lock.release()
+    else:
+        raise ClusterError(ClusterError.SERVER_BUSY, '服务繁忙')
 
 
 @text_cluster_bp.route('/gen_cluster', methods=['POST'])

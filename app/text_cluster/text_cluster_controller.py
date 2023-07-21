@@ -33,6 +33,8 @@ def md5_encrypt(string):
     # 获取加密后的结果
     encrypted_string = md5.hexdigest()
 
+    print("src str: {}, encrypted_string: {}".format(string, encrypted_string))
+
     return encrypted_string
 
 

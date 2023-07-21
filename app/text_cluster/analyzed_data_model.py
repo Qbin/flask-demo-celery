@@ -26,7 +26,6 @@ class AnalyzedData(Document):
 
     @classmethod
     def batch_upsert(cls, indexes, texts, filed_name='analyzed_data'):
-        print(filed_name)
         cls.switch_collection(filed_name)
         for data_id, text in zip(indexes, texts):
             cls.objects(data_id=str(data_id)).update_one(set__analyzed_data=text, upsert=True)

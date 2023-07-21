@@ -152,18 +152,39 @@ class KMEANS:
         # 获取每个簇的中心点
         cluster_centers = self.km.cluster_centers_
 
-        # 计算每个簇中心点与所有样本之间的距离
-        distances = euclidean_distances(self.X, cluster_centers)
+        # 获取每个样本所属的簇标签
+        labels = self.km.labels_
 
-        # 找到每个簇中心点最近的样本
-        closest_samples = np.argmin(distances, axis=0)
+        closest_sample_indices = []
+        for i in range(len(cluster_centers)):
+            # 获取属于当前簇的样本索引
+            samples_in_cluster = np.where(labels == i)[0]
 
-        # # 输出结果
-        # for i, sample_index in enumerate(closest_samples):
-        #     print("Cluster center:", cluster_centers[i])
-        #     print("Closest sample:", self.X[sample_index])
-        #     print()
-        return closest_samples.tolist()
+            # 计算当前簇中样本与簇中心点的距离
+            distances = np.linalg.norm(self.X[samples_in_cluster] - cluster_centers[i], axis=1)
+
+            # 找到距离最近的样本索引
+            closest_sample_index = samples_in_cluster[np.argmin(distances)]
+            closest_sample_indices.append(int(closest_sample_index))
+
+        return closest_sample_indices
+
+    # def find_closest_samples_old(self):
+    #     # 获取每个簇的中心点
+    #     cluster_centers = self.km.cluster_centers_
+    #
+    #     # 计算每个簇中心点与所有样本之间的距离
+    #     distances = euclidean_distances(self.X, cluster_centers)
+    #
+    #     # 找到每个簇中心点最近的样本
+    #     closest_samples = np.argmin(distances, axis=0)
+    #
+    #     # # 输出结果
+    #     # for i, sample_index in enumerate(closest_samples):
+    #     #     print("Cluster center:", cluster_centers[i])
+    #     #     print("Closest sample:", self.X[sample_index])
+    #     #     print()
+    #     return closest_samples.tolist()
 
     def find_nearest_point(self):
         # 计算每个样本点到每个簇质心的距离

@@ -4,6 +4,7 @@
 # @Author  : qinbinbin
 # @email   : qinbinbin@360.cn
 # @File    : text_cluster_controller.py
+import hashlib
 import io
 import os
 import uuid
@@ -18,7 +19,21 @@ from algorithms.kmeans import KMEANS
 from algorithms.load_datas import Data
 from app.text_cluster.analyzed_data_model import AnalyzedData
 from app.text_cluster.cluster_models_model import ClusterModels
+from app.text_cluster.cluster_error import ClusterError
 from common.time_cost import calculate_runtime
+
+
+def md5_encrypt(string):
+    # 创建一个MD5对象
+    md5 = hashlib.md5()
+
+    # 更新MD5对象的内容
+    md5.update(string.encode())
+
+    # 获取加密后的结果
+    encrypted_string = md5.hexdigest()
+
+    return encrypted_string
 
 
 class TextClusterController:
@@ -26,6 +41,7 @@ class TextClusterController:
     # field_name: str = None
     indexes: list = []
     is_draw: bool = False
+    field_name: str = None
 
     def __init__(self):
         pass
@@ -37,6 +53,7 @@ class TextClusterController:
         src_df = pd.read_excel(file_stream, engine='openpyxl', )
         # df = src_df[[field_name]].rename(columns={field_name: "data"})
         self.indexes = src_df["id"]
+        self.field_name = field_name
         return src_df[field_name]
 
     def insert_texts_2_db(self, texts):
@@ -46,10 +63,11 @@ class TextClusterController:
                      zip(self.indexes, texts)]
 
         # 批量插入文档
-        AnalyzedData.batch_insert(documents)
+        AnalyzedData.batch_insert(documents, filed_name=md5_encrypt(self.field_name))
 
     def insert_model_2_db(self, model_type, model_params):
-        model = ClusterModels.add_model(data_indexes=self.indexes, model_type=model_type, model_params=model_params)
+        model = ClusterModels.add_model(data_indexes=self.indexes, model_type=model_type, model_params=model_params,
+                                        field_name=self.field_name)
         return model.str_id
 
     def save_model(self, model, cluster_params, cluster_type="kmeans"):
@@ -62,10 +80,13 @@ class TextClusterController:
     @calculate_runtime
     def get_analyzed_data(self, data_indexes):
         self.indexes = data_indexes
-        query_set = AnalyzedData.batch_find_by_ids(data_indexes)
+        query_set = AnalyzedData.batch_find_by_ids(data_indexes, md5_encrypt(self.field_name))
+        if not query_set:
+            raise ClusterError(ClusterError.NO_DATA, "没有找到数据")
         return query_set
 
     def analyze_data(self, file: io.BytesIO, field_name: str):
+        self.field_name = field_name
         df = self.load_data(file, field_name)
         data = Data()
         texts = data.get_seg_corpus(df)
@@ -104,7 +125,8 @@ class TextClusterController:
         # X, centroids, labels = kmeans.draw()
         # return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}
 
-    def gen_cluster(self, data_indexes, cluster_type, cluster_params):
+    def gen_cluster(self, data_indexes, cluster_type, cluster_params, field_name):
+        self.field_name = field_name
         texts = self.get_analyzed_data(data_indexes)
         corpus = [' '.join(i.analyzed_data) for i in texts]
         if cluster_type == "kmeans":
@@ -118,8 +140,9 @@ class TextClusterController:
         data_indexes = model_obj.data_indexes
         model_params = model_obj.model_params
         model_type = model_obj.model_type
+        self.field_name = model_obj.field_name
         if model_type == "kmeans":
-            _, kmeans = self.gen_cluster(data_indexes, model_type, model_params)
+            _, kmeans = self.gen_cluster(data_indexes, model_type, model_params, self.field_name)
             X, centroids, labels = kmeans.draw()
             return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}
         else:

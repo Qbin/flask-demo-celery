@@ -13,6 +13,7 @@ class ClusterModels(Document):
     data_indexes = ListField(required=True)
     model_params = DictField(required=True)
     model_type = StringField(required=True)
+    field_name = StringField(required=True)
 
     @property
     def str_id(self):

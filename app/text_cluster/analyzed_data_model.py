@@ -13,9 +13,15 @@ from common.time_cost import calculate_runtime
 class AnalyzedData(Document):
     data_id = StringField(required=True)
     analyzed_data = ListField(required=True)
+    meta = {'collection': 'analyzed_data'}
 
     @classmethod
-    def batch_insert(cls, documents):
+    def switch_collection(cls, collection_name, keep_created=True):
+        cls._meta['collection'] = collection_name
+
+    @classmethod
+    def batch_insert(cls, documents, filed_name='analyzed_data'):
+        cls.switch_collection(filed_name)
         cls.objects.insert(documents)
 
     # @classmethod
@@ -30,7 +36,8 @@ class AnalyzedData(Document):
 
     @classmethod
     @calculate_runtime
-    def batch_find_by_ids(cls, id_list):
+    def batch_find_by_ids(cls, id_list, filed_name='analyzed_data'):
+        cls.switch_collection(filed_name)
         if id_list:
             return cls.objects(data_id__in=id_list)
             # return cls.objects(data_id__in=id_list).only("analyzed_data")
@@ -54,6 +61,6 @@ if __name__ == "__main__":
     id_list = ['1', '3']
 
     # 根据id列表批量查找文档
-    results = TextCluster.batch_find_by_ids(id_list)
+    results = AnalyzedData.batch_find_by_ids(id_list)
     for result in results:
         print(result.data_id, result.analyzed_data)

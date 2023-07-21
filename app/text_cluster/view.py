@@ -42,13 +42,14 @@ def gen_cluster():
     # todo 响应时间过长
     params = request.json
     a_id = params.get("a_id")
+    field_name = params.get("field_name", "analyzed_data")
     data_indexes = params.get("data_indexes", None)
     cluster_type = params.get("cluster_type", "kmeans")
     cluster_params = params.get("cluster_params", None)
 
     # todo 根据a_id和data_indexes获取数据
     tcc = TextClusterController()
-    result, _ = tcc.gen_cluster(data_indexes, cluster_type, cluster_params)
+    result, _ = tcc.gen_cluster(data_indexes, cluster_type, cluster_params, field_name)
     return result
 
 

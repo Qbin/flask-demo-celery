@@ -59,11 +59,12 @@ class TextClusterController:
     def insert_texts_2_db(self, texts):
         # todo 如果data_id已存在，则覆盖
         # 为确保id的类型一致，这里强制转成string
-        documents = [AnalyzedData(data_id=str(data_id), analyzed_data=text) for data_id, text in
-                     zip(self.indexes, texts)]
+        # documents = [AnalyzedData(data_id=str(data_id), analyzed_data=text) for data_id, text in
+        #              zip(self.indexes, texts)]
+        # # 批量插入文档
+        # AnalyzedData.batch_insert(documents, filed_name=md5_encrypt(self.field_name))
 
-        # 批量插入文档
-        AnalyzedData.batch_insert(documents, filed_name=md5_encrypt(self.field_name))
+        AnalyzedData.batch_upsert(self.indexes, texts, filed_name=md5_encrypt(self.field_name))
 
     def insert_model_2_db(self, model_type, model_params):
         model = ClusterModels.add_model(data_indexes=self.indexes, model_type=model_type, model_params=model_params,

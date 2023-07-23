@@ -4,10 +4,8 @@
 # @Author  : qinbinbin
 # @email   : qinbinbin@360.cn
 # @File    : text_cluster_controller.py
-import hashlib
 import io
 import os
-import uuid
 
 import joblib
 import pandas as pd
@@ -20,22 +18,8 @@ from algorithms.load_datas import Data
 from app.text_cluster.analyzed_data_model import AnalyzedData
 from app.text_cluster.cluster_models_model import ClusterModels
 from app.text_cluster.cluster_error import ClusterError
+from app.text_cluster.utils import md5_encrypt
 from common.time_cost import calculate_runtime
-
-
-def md5_encrypt(string):
-    # 创建一个MD5对象
-    md5 = hashlib.md5()
-
-    # 更新MD5对象的内容
-    md5.update(string.encode())
-
-    # 获取加密后的结果
-    encrypted_string = md5.hexdigest()
-
-    print("src str: {}, encrypted_string: {}".format(string, encrypted_string))
-
-    return encrypted_string
 
 
 class TextClusterController:
@@ -120,7 +104,7 @@ class TextClusterController:
         nearest_points = None
         # nearest_points = kmeans.find_nearest_point()
         # todo 待完善
-        # kmeans.find_n()
+        nearest_points = dbscan.find_density_max_point_indices()
 
         return {"model_id": model_id, "nearest_points": nearest_points}, dbscan
 

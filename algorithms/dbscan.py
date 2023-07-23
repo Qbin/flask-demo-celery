@@ -19,6 +19,7 @@ from sklearn.decomposition import TruncatedSVD, PCA
 from sklearn.preprocessing import Normalizer
 from sklearn.cluster import DBSCAN
 from sklearn.neighbors import KernelDensity
+from sklearn.neighbors import NearestNeighbors
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -135,8 +136,28 @@ class Dbscan:
         plt.legend()
         plt.show()
 
-        return self.dbscan.components_, "xxx", labels
+        return self.X, "", self.dbscan.labels_
+        # return self.dbscan.components_, "xxx", labels
 
-    def find_n(self):
-        # todo 待完善
-        pass
+    def find_density_max_point_indices(self):
+        # 获取核心点的索引
+        core_samples_indices = self.dbscan.core_sample_indices_
+
+        # 计算每个簇的密度最大点的索引
+        density_max_point_indices = []
+        for cluster_label in set(self.dbscan.labels_):
+            if cluster_label != -1:  # 排除噪声点
+                cluster_core_samples = self.X[self.dbscan.labels_ == cluster_label]
+                nbrs = NearestNeighbors(n_neighbors=len(cluster_core_samples)).fit(cluster_core_samples)
+                distances, indices = nbrs.kneighbors(cluster_core_samples)
+                density = np.sum(distances[:, 1:], axis=1)  # 计算密度
+                max_density_index = np.argmax(density)  # 获取密度最大点的索引
+                density_max_point_index = np.where(self.dbscan.labels_ == cluster_label)[0][max_density_index]
+                density_max_point_indices.append(int(density_max_point_index))
+
+        # 打印每个簇的密度最大点的索引
+        for i, index in enumerate(density_max_point_indices):
+            print("簇{}的密度最大点的索引：{}".format(i, index))
+            print(self.X[index])
+
+        return density_max_point_indices

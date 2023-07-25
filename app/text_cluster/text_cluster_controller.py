@@ -5,7 +5,9 @@
 # @email   : qinbinbin@360.cn
 # @File    : text_cluster_controller.py
 import io
+import logging
 import os
+import time
 
 import joblib
 import pandas as pd
@@ -37,6 +39,7 @@ class TextClusterController:
         file_stream = io.BytesIO(file.read())
         # 使用read_excel函数创建DataFrame
         src_df = pd.read_excel(file_stream, engine='openpyxl', )
+        # src_df = pd.read_csv(file_stream)
         # df = src_df[[field_name]].rename(columns={field_name: "data"})
         self.indexes = src_df["id"]
         self.field_name = field_name
@@ -115,7 +118,9 @@ class TextClusterController:
     def gen_cluster(self, data_indexes, cluster_type, cluster_params, field_name):
         self.field_name = field_name
         texts = self.get_analyzed_data(data_indexes)
+        st = time.time()
         corpus = [' '.join(i.analyzed_data) for i in texts]
+        logging.info("get analyzed_data cost time {}".format(time.time() - st))
         if cluster_type == "kmeans":
             return self.use_kmeans(corpus, cluster_params)
         elif cluster_type == "dbscan":
@@ -133,7 +138,10 @@ class TextClusterController:
             X, centroids, labels = kmeans.draw()
             return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}
         else:
+            # _, dbscan = self.gen_cluster(data_indexes, model_type, model_params, self.field_name)
+            # X, centroids, labels = kmeans.draw()
             model_name = "{}.model".format(model_id)
             model_file_name = os.path.join(current_app.root_path, "model", model_name)
             model = joblib.load(model_file_name)
-            return {"X": model.components_.tolist(), "model_params": model_params, "labels": model.labels_.tolist()}
+            core_labels = model.labels_[model.core_sample_indices_]
+            return {"X": model.components_.tolist(), "model_params": model_params, "labels": core_labels.tolist()}

@@ -6,6 +6,7 @@
 # @File    : time_cost.py
 
 import time
+import logging
 
 
 # 定义一个装饰器函数
@@ -15,7 +16,7 @@ def calculate_runtime(func):
         result = func(*args, **kwargs)  # 执行被装饰的函数
         end_time = time.time()  # 记录函数结束时间
         runtime = end_time - start_time  # 计算函数运行时长
-        print(f"函数 {func.__name__} 运行时长：{runtime} 秒")
+        logging.info(f"函数 {func.__name__} 运行时长：{runtime} 秒")
         return result
 
     return wrapper
@@ -26,7 +27,6 @@ def calculate_runtime(func):
 def my_function():
     # 在这里编写您的函数代码
     time.sleep(2)  # 模拟函数执行时间
-
 
 # 调用被装饰的函数
 # my_function()

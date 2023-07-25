@@ -143,9 +143,9 @@ class KMEANS:
         centroids = self.km.cluster_centers_
         labels = self.km.labels_
         # # 绘制数据点和聚类中心
-        plt.scatter(self.X[:, 0], self.X[:, 1], c=labels)
-        plt.scatter(centroids[:, 0], centroids[:, 1], marker='x', color='r')
-        plt.show()
+        # plt.scatter(self.X[:, 0], self.X[:, 1], c=labels)
+        # plt.scatter(centroids[:, 0], centroids[:, 1], marker='x', color='r')
+        # plt.show()
         return self.X, centroids, labels
 
     def find_closest_samples(self):

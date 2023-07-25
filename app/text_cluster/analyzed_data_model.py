@@ -4,6 +4,7 @@
 # @Author  : qinbinbin
 # @email   : qinbinbin@360.cn
 # @File    : test_model.py
+import os
 
 from mongoengine import Document, StringField, ListField
 
@@ -45,6 +46,22 @@ class AnalyzedData(Document):
     @calculate_runtime
     def batch_find_by_ids(cls, id_list, filed_name='analyzed_data'):
         cls.switch_collection(filed_name)
+        if os.getenv("DB_MODE") == "mongo":
+            # 使用聚合操作提取数据
+            pipeline = [
+                {
+                    '$match': {
+                        'data_id': {'$in': id_list}
+                    }
+                },
+                {
+                    '$project': {
+                        'analyzed_data': 1
+                    }
+                }
+            ]
+            return cls.objects.aggregate(*pipeline)
+
         if id_list:
             return cls.objects(data_id__in=id_list)
             # return cls.objects(data_id__in=id_list).only("analyzed_data")

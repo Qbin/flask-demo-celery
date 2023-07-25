@@ -119,7 +119,11 @@ class TextClusterController:
         self.field_name = field_name
         texts = self.get_analyzed_data(data_indexes)
         st = time.time()
-        corpus = [' '.join(i.analyzed_data) for i in texts]
+        if os.getenv("DB_MODE") == "mongo":
+            logging.info("use DB MODE")
+            corpus = [' '.join(i["analyzed_data"]) for i in texts]
+        else:
+            corpus = [' '.join(i.analyzed_data) for i in texts]
         logging.info("get analyzed_data cost time {}".format(time.time() - st))
         if cluster_type == "kmeans":
             return self.use_kmeans(corpus, cluster_params)

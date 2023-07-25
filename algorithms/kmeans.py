@@ -5,6 +5,9 @@ Create on 2020/9/28 4:13 下午
 @Author: dfsj
 @Description:  Kmeans 文本聚类
 """
+import logging
+import time
+
 from sklearn.pipeline import make_pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer, HashingVectorizer, TfidfTransformer
 from sklearn.decomposition import TruncatedSVD, PCA
@@ -28,7 +31,7 @@ class KMEANS:
     svd = None
     is_draw = False
 
-    def __init__(self, texts, num_clusters=10, minibatch=True, n_components=100,
+    def __init__(self, texts, num_clusters=10, minibatch=True, n_components=2,
                  n_features=250000, use_hashing=False, use_idf=True, is_draw=False):
         """
         :param texts:           聚类文本
@@ -60,16 +63,20 @@ class KMEANS:
             else:
                 self.vectorizer = HashingVectorizer(n_features=self.n_features, alternate_sign=False, norm='l2')
         else:
-            self.vectorizer = TfidfVectorizer(max_df=0.5, min_df=2, use_idf=self.use_idf)
+            self.vectorizer = TfidfVectorizer(max_features=self.n_features, max_df=0.5, min_df=2, use_idf=self.use_idf)
+            # self.vectorizer = TfidfVectorizer(max_df=0.5, min_df=2, use_idf=self.use_idf)
+        st = time.time()
         self.X = self.vectorizer.fit_transform(self.texts)
+        logging.info("tfidf cost time {}".format(time.time() - st))
         logger.info("n_samples: %d, n_features: %d" % self.X.shape)
 
+        st = time.time()
         if self.n_components:
             logger.info("Performing dimensionality reduction using LSA")
             # Vectorizer results are normalized, which makes KMeans behave as
             # spherical k-means for better results. Since LSA/SVD results are
             # not normalized, we have to redo the normalization.
-            self.svd = TruncatedSVD(self.n_components)
+            self.svd = TruncatedSVD(self.n_components, algorithm='arpack')
             normalizer = Normalizer(copy=False)
             if self.is_draw:
                 lsa = make_pipeline(self.svd)
@@ -78,6 +85,7 @@ class KMEANS:
             self.X = lsa.fit_transform(self.X)
             explained_variance = self.svd.explained_variance_ratio_.sum()
             logger.info("Explained variance of the SVD step: {}%".format(int(explained_variance * 100)))
+        logging.info("svd cost time  {}".format(time.time() - st))
 
     @calculate_runtime
     def train(self):

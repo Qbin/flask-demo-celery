@@ -5,7 +5,6 @@
 # @email   : qinbinbin@360.cn
 # @File    : view.py
 import logging
-import os.path
 
 from flask import request
 from threading import Lock
@@ -76,3 +75,15 @@ def draw_cluster():
 
     tcc = TextClusterController()
     return tcc.draw_cluster(model_id)
+
+
+@text_cluster_bp.route('/is_analyze_data', methods=['POST'])
+def is_analyze_data():
+    # todo 响应时间过长
+    params = request.json
+    field_name = params.get("field_name", "analyzed_data")
+    data_indexes = params.get("data_indexes", None)
+
+    tcc = TextClusterController()
+    result = tcc.is_analyze_data(data_indexes, field_name)
+    return result

@@ -83,11 +83,16 @@ class TextClusterController:
         self.insert_texts_2_db(texts)
 
     def use_kmeans(self, corpus, cluster_params):
-        if self.is_draw:
-            kmeans = KMEANS(corpus, num_clusters=cluster_params.get("num_clusters"), n_components=2,
-                            is_draw=self.is_draw)
-        else:
-            kmeans = KMEANS(corpus, num_clusters=cluster_params.get("num_clusters"), is_draw=self.is_draw)
+        try:
+            if self.is_draw:
+                kmeans = KMEANS(corpus, num_clusters=cluster_params.get("num_clusters"), n_components=2,
+                                is_draw=self.is_draw)
+            else:
+                kmeans = KMEANS(corpus, num_clusters=cluster_params.get("num_clusters"), is_draw=self.is_draw)
+        except ValueError as e:
+            logging.exception(e)
+            logging.error("向量化异常")
+            raise ClusterError(ClusterError.TEXT2VEC, "向量化异常")
         model = kmeans.train()
         model_id = self.save_model(model, cluster_params)
         # kmeans.print_top_terms()
@@ -100,7 +105,12 @@ class TextClusterController:
         # return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}
 
     def use_dbscan(self, corpus, cluster_params):
-        dbscan = Dbscan(corpus, eps=cluster_params.get("eps", 0.5), min_samples=cluster_params.get("min_samples", 2))
+        try:
+            dbscan = Dbscan(corpus, eps=cluster_params.get("eps", 0.5),
+                            min_samples=cluster_params.get("min_samples", 2))
+        except Exception as e:
+            logging.error("向量化异常")
+            raise ClusterError(ClusterError.TEXT2VEC, "向量化异常")
         model = dbscan.train()
         model_id = self.save_model(model, cluster_params, "dbscan")
         # kmeans.print_top_terms()
@@ -149,3 +159,7 @@ class TextClusterController:
             model = joblib.load(model_file_name)
             core_labels = model.labels_[model.core_sample_indices_]
             return {"X": model.components_.tolist(), "model_params": model_params, "labels": core_labels.tolist()}
+
+    def is_analyze_data(self, data_indexes, field_name):
+        query_set = AnalyzedData.get_exist_data_id(data_indexes, md5_encrypt(field_name))
+        return [i["data_id"] for i in query_set]

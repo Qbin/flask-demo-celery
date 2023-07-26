@@ -68,6 +68,25 @@ class AnalyzedData(Document):
         else:
             return cls.objects()
 
+    @classmethod
+    @calculate_runtime
+    def get_exist_data_id(cls, id_list, filed_name='analyzed_data'):
+        cls.switch_collection(filed_name)
+
+        pipeline = [
+            {
+                '$match': {
+                    'data_id': {'$in': id_list}
+                }
+            },
+            {
+                '$project': {
+                    'data_id': 1
+                }
+            }
+        ]
+        return cls.objects.aggregate(*pipeline)
+
 
 # 示例用法
 if __name__ == "__main__":

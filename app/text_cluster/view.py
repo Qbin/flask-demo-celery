@@ -77,13 +77,16 @@ def draw_cluster():
     return tcc.draw_cluster(model_id)
 
 
-@text_cluster_bp.route('/is_analyze_data', methods=['POST'])
-def is_analyze_data():
+@text_cluster_bp.route('/is_seg_data', methods=['POST'])
+def is_seg_data():
     # todo 响应时间过长
     params = request.json
     field_name = params.get("field_name", "analyzed_data")
     data_indexes = params.get("data_indexes", None)
 
     tcc = TextClusterController()
-    result = tcc.is_analyze_data(data_indexes, field_name)
-    return result
+    result = tcc.is_seg_data(data_indexes, field_name)
+    return {
+        "is_seg_data": result,
+        "un_seg_data": list(set(data_indexes)- set(result))
+    }

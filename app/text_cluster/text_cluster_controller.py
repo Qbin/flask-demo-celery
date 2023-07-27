@@ -160,6 +160,6 @@ class TextClusterController:
             core_labels = model.labels_[model.core_sample_indices_]
             return {"X": model.components_.tolist(), "model_params": model_params, "labels": core_labels.tolist()}
 
-    def is_analyze_data(self, data_indexes, field_name):
+    def is_seg_data(self, data_indexes, field_name):
         query_set = AnalyzedData.get_exist_data_id(data_indexes, md5_encrypt(field_name))
         return [i["data_id"] for i in query_set]

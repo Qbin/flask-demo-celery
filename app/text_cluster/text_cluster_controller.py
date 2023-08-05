@@ -95,10 +95,10 @@ class TextClusterController:
             raise ClusterError(ClusterError.TEXT2VEC, "向量化异常")
         model = kmeans.train()
         model_id = self.save_model(model, cluster_params)
-        # kmeans.print_top_terms()
+        cluster_keywords = kmeans.print_top_terms()
         nearest_points = kmeans.find_closest_samples()
 
-        return {"model_id": model_id, "nearest_points": nearest_points}, kmeans
+        return {"model_id": model_id, "nearest_points": nearest_points, "cluster_keywords": cluster_keywords}, kmeans
 
         # return kmeans.print_top_terms()
         # X, centroids, labels = kmeans.draw()
@@ -152,13 +152,13 @@ class TextClusterController:
             X, centroids, labels = kmeans.draw()
             return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}
         else:
-            # _, dbscan = self.gen_cluster(data_indexes, model_type, model_params, self.field_name)
-            # X, centroids, labels = kmeans.draw()
-            model_name = "{}.model".format(model_id)
-            model_file_name = os.path.join(current_app.root_path, "model", model_name)
-            model = joblib.load(model_file_name)
-            core_labels = model.labels_[model.core_sample_indices_]
-            return {"X": model.components_.tolist(), "model_params": model_params, "labels": core_labels.tolist()}
+            _, dbscan = self.gen_cluster(data_indexes, model_type, model_params, self.field_name)
+            X, centroids, labels = dbscan.draw()
+            # model_name = "{}.model".format(model_id)
+            # model_file_name = os.path.join(current_app.root_path, "model", model_name)
+            # model = joblib.load(model_file_name)
+            # core_labels = model.labels_[model.core_sample_indices_]
+            return {"X": X.tolist(), "model_params": model_params, "labels": labels.tolist()}
 
     def is_seg_data(self, data_indexes, field_name):
         query_set = AnalyzedData.get_exist_data_id(data_indexes, md5_encrypt(field_name))

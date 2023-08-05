@@ -117,7 +117,7 @@ class KMEANS:
                     res.append(terms[ind])
                 logger.info("Cluster {}: {}".format(i, " ".join(res)))
                 cluster_top_n.append(res)
-            return {"cluster_top_n": cluster_top_n}
+            return cluster_top_n
         else:
             logger.warning("hash 编码方式不支持该方法")
 

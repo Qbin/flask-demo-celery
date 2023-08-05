@@ -120,21 +120,21 @@ class Dbscan:
             density_estimates.append(kde.score_samples(cluster_points))
 
         # Plot cluster density
-        plt.figure(figsize=(8, 6))
-        for cluster_label, density_estimate in zip(np.unique(labels), density_estimates):
-            cluster_points = self.X[labels == cluster_label]
-            plt.scatter(cluster_points[:, 0], cluster_points[:, 1], alpha=0.5, label=f'Cluster {cluster_label}')
-            x, y = np.meshgrid(np.linspace(cluster_points[:, 0].min(), cluster_points[:, 0].max(), 100),
-                               np.linspace(cluster_points[:, 1].min(), cluster_points[:, 1].max(), 100))
-            xy = np.vstack([x.ravel(), y.ravel()]).T
-            z = np.exp(kde.score_samples(xy))
-            z = z.reshape(x.shape)
-            plt.contour(x, y, z, cmap='hot')
-        plt.xlabel('X')
-        plt.ylabel('Y')
-        plt.title('DBSCAN Clustering - Cluster Density')
-        plt.legend()
-        plt.show()
+        # plt.figure(figsize=(8, 6))
+        # for cluster_label, density_estimate in zip(np.unique(labels), density_estimates):
+        #     cluster_points = self.X[labels == cluster_label]
+        #     plt.scatter(cluster_points[:, 0], cluster_points[:, 1], alpha=0.5, label=f'Cluster {cluster_label}')
+        #     x, y = np.meshgrid(np.linspace(cluster_points[:, 0].min(), cluster_points[:, 0].max(), 100),
+        #                        np.linspace(cluster_points[:, 1].min(), cluster_points[:, 1].max(), 100))
+        #     xy = np.vstack([x.ravel(), y.ravel()]).T
+        #     z = np.exp(kde.score_samples(xy))
+        #     z = z.reshape(x.shape)
+        #     plt.contour(x, y, z, cmap='hot')
+        # plt.xlabel('X')
+        # plt.ylabel('Y')
+        # plt.title('DBSCAN Clustering - Cluster Density')
+        # plt.legend()
+        # plt.show()
 
         return self.X, "", self.dbscan.labels_
         # return self.dbscan.components_, "xxx", labels

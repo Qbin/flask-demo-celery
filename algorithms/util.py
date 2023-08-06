@@ -15,7 +15,7 @@ stop_words = set([item.strip() for item in open(PATH_STOPWORDS, 'r').readlines()
 def clear_character(sentence):
     """ 只保留汉字、字母、数字 """
     pattern = re.compile('[^\u4e00-\u9fa5^a-z^A-Z^0-9]')
-    line = re.sub(pattern, '', sentence)
+    line = re.sub(pattern, '', sentence.lower())
     new_sentence = ''.join(line.split())  # 去除空白
     return new_sentence
 

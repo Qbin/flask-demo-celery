@@ -141,6 +141,8 @@ class Data:
         train_clean = [clear_character(data) for data in datas]
         logger.info("数据清洗完，示例为：{}".format(train_clean[0]))
         train_seg_text = [jieba.lcut(s) for s in train_clean]
+        jieba.add_word("chatgpt")
+        jieba.add_word("stablediffusion")
         # pool = Pool()
         # train_seg_text = pool.imap(parallel_cut, train_clean)
         # pool.close()

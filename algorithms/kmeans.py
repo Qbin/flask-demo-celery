@@ -31,7 +31,7 @@ class KMEANS:
     svd = None
     is_draw = False
 
-    def __init__(self, texts, num_clusters=10, minibatch=True, n_components=2,
+    def __init__(self, texts, num_clusters=10, minibatch=True, n_components=100,
                  n_features=250000, use_hashing=False, use_idf=True, is_draw=False):
         """
         :param texts:           聚类文本
@@ -139,20 +139,20 @@ class KMEANS:
         logger.info(-self.km.score(self.X))
 
     def draw(self):
-        # if self.X.shape[1] >= 2:
-        #     pca = PCA(2)
-        #     # normalizer = Normalizer(copy=False)
-        #     # lsa = make_pipeline(svd, normalizer)
-        #     self.X = pca.fit_transform(self.X)
-        #     explained_variance = pca.explained_variance_ratio_.sum()
-        #     logger.info("Explained variance of the SVD step: {}%".format(int(explained_variance * 100)))
+        if self.X.shape[1] >= 2:
+            pca = PCA(2)
+            # normalizer = Normalizer(copy=False)
+            # lsa = make_pipeline(svd, normalizer)
+            self.X = pca.fit_transform(self.X)
+            explained_variance = pca.explained_variance_ratio_.sum()
+            logger.info("Explained variance of the SVD step: {}%".format(int(explained_variance * 100)))
 
         # 获取聚类中心和预测的标签
         centroids = self.km.cluster_centers_
         labels = self.km.labels_
         # # 绘制数据点和聚类中心
         # plt.scatter(self.X[:, 0], self.X[:, 1], c=labels)
-        # plt.scatter(centroids[:, 0], centroids[:, 1], marker='x', color='r')
+        # # plt.scatter(centroids[:, 0], centroids[:, 1], marker='x', color='r')
         # plt.show()
         return self.X, centroids, labels
 

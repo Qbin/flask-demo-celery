@@ -30,6 +30,7 @@ class TextClusterController:
     indexes: list = []
     is_draw: bool = False
     field_name: str = None
+    dim: int = 100
 
     def __init__(self):
         pass
@@ -88,7 +89,8 @@ class TextClusterController:
                 kmeans = KMEANS(corpus, num_clusters=cluster_params.get("num_clusters"), n_components=2,
                                 is_draw=self.is_draw)
             else:
-                kmeans = KMEANS(corpus, num_clusters=cluster_params.get("num_clusters"), is_draw=self.is_draw)
+                kmeans = KMEANS(corpus, num_clusters=cluster_params.get("num_clusters"), n_components=self.dim,
+                                is_draw=self.is_draw)
         except ValueError as e:
             logging.exception(e)
             logging.error("向量化异常")
@@ -97,8 +99,10 @@ class TextClusterController:
         model_id = self.save_model(model, cluster_params)
         cluster_keywords = kmeans.print_top_terms()
         nearest_points = kmeans.find_closest_samples()
+        kmeans.draw()
 
-        return {"model_id": model_id, "nearest_points": nearest_points, "cluster_keywords": cluster_keywords}, kmeans
+        return {"model_id": model_id, "nearest_points": nearest_points, "cluster_keywords": cluster_keywords,
+                "X": kmeans.X.tolist(), "labels": kmeans.km.labels_.tolist()}, kmeans
 
         # return kmeans.print_top_terms()
         # X, centroids, labels = kmeans.draw()
@@ -106,7 +110,7 @@ class TextClusterController:
 
     def use_dbscan(self, corpus, cluster_params):
         try:
-            dbscan = Dbscan(corpus, eps=cluster_params.get("eps", 0.5),
+            dbscan = Dbscan(corpus, eps=cluster_params.get("eps", 0.5), n_components=self.dim,
                             min_samples=cluster_params.get("min_samples", 2))
         except Exception as e:
             logging.error("向量化异常")
@@ -116,17 +120,21 @@ class TextClusterController:
         # kmeans.print_top_terms()
         nearest_points = None
         # nearest_points = kmeans.find_nearest_point()
+        dbscan.draw()
         # todo 待完善
         nearest_points = dbscan.find_density_max_point_indices()
+        logging.info("nearest_points: {}, labels: {} ".format(nearest_points, model.labels_))
 
-        return {"model_id": model_id, "nearest_points": nearest_points}, dbscan
+        return {"model_id": model_id, "nearest_points": nearest_points,
+                "X": dbscan.X.tolist(), "labels": model.labels_.tolist()}, dbscan
 
         # return kmeans.print_top_terms()
         # X, centroids, labels = kmeans.draw()
         # return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}
 
-    def gen_cluster(self, data_indexes, cluster_type, cluster_params, field_name):
+    def gen_cluster(self, data_indexes, cluster_type, cluster_params, field_name, dim=100):
         self.field_name = field_name
+        self.dim = dim
         texts = self.get_analyzed_data(data_indexes)
         st = time.time()
         if os.getenv("DB_MODE") == "mongo":
@@ -150,15 +158,21 @@ class TextClusterController:
         if model_type == "kmeans":
             _, kmeans = self.gen_cluster(data_indexes, model_type, model_params, self.field_name)
             X, centroids, labels = kmeans.draw()
-            return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}
+            cluster_keywords = kmeans.print_top_terms()
+            nearest_points = kmeans.find_closest_samples()
+            return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist(),
+                    "nearest_points": nearest_points, "cluster_keywords": cluster_keywords}
         else:
             _, dbscan = self.gen_cluster(data_indexes, model_type, model_params, self.field_name)
             X, centroids, labels = dbscan.draw()
+            nearest_points = dbscan.find_density_max_point_indices()
+            # logging.info("DBSCAN nearest_points: {}, labels: {} ".format(nearest_points, labels))
             # model_name = "{}.model".format(model_id)
             # model_file_name = os.path.join(current_app.root_path, "model", model_name)
             # model = joblib.load(model_file_name)
             # core_labels = model.labels_[model.core_sample_indices_]
-            return {"X": X.tolist(), "model_params": model_params, "labels": labels.tolist()}
+            return {"X": X.tolist(), "model_params": model_params, "labels": labels.tolist(),
+                    "nearest_points": nearest_points}
 
     def is_seg_data(self, data_indexes, field_name):
         query_set = AnalyzedData.get_exist_data_id(data_indexes, md5_encrypt(field_name))

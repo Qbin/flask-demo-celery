@@ -13,6 +13,8 @@ Create on 2020/9/28 4:13 下午
 @Author: dfsj
 @Description:  Kmeans 文本聚类
 """
+import logging
+
 from sklearn.pipeline import make_pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD, PCA
@@ -64,8 +66,8 @@ class Dbscan:
         self.X = self.vectorizer.fit_transform(self.texts)
         logger.info("n_samples: %d, n_features: %d" % self.X.shape)
 
-        self.svd = TruncatedSVD(2)
-        normalizer = Normalizer(copy=False)
+        self.svd = TruncatedSVD(self.n_components)
+        # normalizer = Normalizer(copy=False)
         # lsa = make_pipeline(self.svd, normalizer)
         lsa = make_pipeline(self.svd)
         self.X = lsa.fit_transform(self.X)
@@ -119,6 +121,14 @@ class Dbscan:
             kde.fit(cluster_points)
             density_estimates.append(kde.score_samples(cluster_points))
 
+        if self.X.shape[1] >= 2:
+            pca = PCA(2)
+            # normalizer = Normalizer(copy=False)
+            # lsa = make_pipeline(svd, normalizer)
+            self.X = pca.fit_transform(self.X)
+            explained_variance = pca.explained_variance_ratio_.sum()
+            logger.info("Explained variance of the SVD step: {}%".format(int(explained_variance * 100)))
+
         # Plot cluster density
         # plt.figure(figsize=(8, 6))
         # for cluster_label, density_estimate in zip(np.unique(labels), density_estimates):
@@ -157,7 +167,7 @@ class Dbscan:
 
         # 打印每个簇的密度最大点的索引
         for i, index in enumerate(density_max_point_indices):
-            print("簇{}的密度最大点的索引：{}".format(i, index))
-            print(self.X[index])
+            logging.info("簇{}的密度最大点的索引：{}".format(i, index))
+            logging.info(self.X[index])
 
         return density_max_point_indices

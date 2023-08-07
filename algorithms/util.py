@@ -5,11 +5,16 @@ Create on 2020/9/4 2:22 下午
 @Author: dfsj
 @Description: 
 """
+import logging
 import re
 import pickle
 from algorithms.config import *
 
 stop_words = set([item.strip() for item in open(PATH_STOPWORDS, 'r').readlines()])
+try:
+    keywords = set([item.strip() for item in open(PATH_KEYWORDS, 'r').readlines()])
+except:
+    keywords = ["chatgpt", "stablediffusion"]
 
 
 def clear_character(sentence):
@@ -32,7 +37,8 @@ def drop_stopwords(line):
 
 def get_jieba_keywords():
     # todo 从数据库获取、从文件获取、从接口获取
-    return ["chatgpt", "stablediffusion"]
+    logging.info("jieba keywords {}".format(keywords))
+    return keywords
 
 
 def save_texts(texts, field_name):

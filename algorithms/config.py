@@ -13,6 +13,7 @@ BASE_PATH = os.path.dirname(__file__)
 DATA_PATH = os.path.join(BASE_PATH, "data")
 
 PATH_STOPWORDS = os.path.join(DATA_PATH, "stopwords.txt")
+PATH_KEYWORDS = os.path.join("/tmp", "keywords.txt")
 PATH_MALLET = os.path.join(DATA_PATH, 'mallet-2.0.8', "bin",
                            "mallet")  # Download File: http://mallet.cs.umass.edu/dist/mallet-2.0.8.zip
 

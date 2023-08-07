@@ -11,7 +11,7 @@ import jieba
 import numpy as np
 from algorithms.config import *
 from common.time_cost import calculate_runtime
-from algorithms.util import clear_character, drop_stopwords
+from algorithms.util import clear_character, drop_stopwords, get_jieba_keywords
 
 from multiprocessing import Pool
 
@@ -133,16 +133,19 @@ class Data:
         # self.df = pd.read_csv(self.data_path, delimiter="\t", header=None, names=["label", "data"])
         # logger.info("已加载数据集，原标注数据集具有以下 label：{}".format(",".join(self.df.label.unique())))
 
+    def jieba_add_keywords(self):
+        for keyword in get_jieba_keywords():
+            jieba.add_word(keyword)
+
     @calculate_runtime
     def data_cut(self, datas=None):
         if datas.empty:
             datas = self.df["data"]
+        self.jieba_add_keywords()
         logger.info("对数据集进行清洗并分词，请稍后 ...")
         train_clean = [clear_character(data) for data in datas]
         logger.info("数据清洗完，示例为：{}".format(train_clean[0]))
         train_seg_text = [jieba.lcut(s) for s in train_clean]
-        jieba.add_word("chatgpt")
-        jieba.add_word("stablediffusion")
         # pool = Pool()
         # train_seg_text = pool.imap(parallel_cut, train_clean)
         # pool.close()

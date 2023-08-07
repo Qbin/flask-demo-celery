@@ -30,6 +30,11 @@ def drop_stopwords(line):
     return line_clean
 
 
+def get_jieba_keywords():
+    # todo 从数据库获取、从文件获取、从接口获取
+    return ["chatgpt", "stablediffusion"]
+
+
 def save_texts(texts, field_name):
     # 序列化并保存到文件
     with open('{}_list.pkl'.format(field_name), 'wb') as f:

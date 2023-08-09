@@ -1,0 +1,19 @@
+version: '3'
+services:
+  text-cluster:
+    image: text_cluster:s_v5
+    ports:
+      - 8888:80
+    environment:
+      DB_MODE: mongo
+    depends_on:
+      - mongo
+    volumes:
+      - /tmp/keywords.txt.bak:/tmp/keywords.txt
+
+  mongo:
+    image: mongo:6.0.8
+    ports:
+      - 27017:27017
+    volumes:
+      - /tmp/mongo-data:/data/db

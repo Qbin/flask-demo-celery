@@ -15,6 +15,8 @@ Create on 2020/9/28 4:13 下午
 """
 import logging
 
+import umap
+from sklearn.manifold import TSNE
 from sklearn.pipeline import make_pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD, PCA
@@ -148,6 +150,76 @@ class Dbscan:
 
         return self.X, "", self.dbscan.labels_
         # return self.dbscan.components_, "xxx", labels
+
+    def draw_new2(self, decomposition_metch="pca"):
+        if decomposition_metch == "umap":
+            reducer = umap.UMAP(random_state=42)
+            X = reducer.fit_transform(self.X)
+        elif decomposition_metch == "tsne":
+            tsne = TSNE(n_components=2)
+            X = tsne.fit_transform(self.X)
+        elif decomposition_metch == "pca":
+            pca = PCA(n_components=2)
+            X = pca.fit_transform(self.X)
+        elif decomposition_metch == "svd":
+            svd = TruncatedSVD(2)
+            # # normalizer = Normalizer(copy=False)
+            # # lsa = make_pipeline(svd, normalizer)
+            X = svd.fit_transform(self.X)
+            # explained_variance = svd.explained_variance_ratio_.sum()
+            # logger.info("Explained variance of the SVD step: {}%".format(int(explained_variance * 100)))
+
+            # if self.X.shape[1] >= 2:
+            #     pca = PCA(2)
+            #     # normalizer = Normalizer(copy=False)
+            #     # lsa = make_pipeline(svd, normalizer)
+            #     self.X = pca.fit_transform(self.X)
+            #     explained_variance = pca.explained_variance_ratio_.sum()
+            #     logger.info("Explained variance of the SVD step: {}%".format(int(explained_variance * 100)))
+
+            # 获取聚类中心和预测的标签
+        # centroids = self.km.cluster_centers_
+        labels = self.dbscan.labels_
+        # # 绘制数据点和聚类中心
+        plt.title(decomposition_metch)
+        plt.scatter(X[:, 0], X[:, 1], c=labels)
+        # # plt.scatter(centroids[:, 0], centroids[:, 1], marker='x', color='r')
+        plt.show()
+        return X, "centroids", labels
+
+
+    def draw_new(self):
+        # 获取核心点的索引
+        core_samples_mask = np.zeros_like(self.dbscan.labels_, dtype=bool)
+        core_samples_mask[self.dbscan.core_sample_indices_] = True
+
+        # 获取每个点的标签
+        labels = self.dbscan.labels_
+
+        # 获取聚类数量
+        n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+
+        # 画出密度图
+        unique_labels = set(labels)
+        colors = [plt.cm.Spectral(each)
+                  for each in np.linspace(0, 1, len(unique_labels))]
+        for k, col in zip(unique_labels, colors):
+            if k == -1:
+                # 为噪点设置黑色
+                col = [0, 0, 0, 1]
+
+            class_member_mask = (labels == k)
+
+            xy = self.X[class_member_mask & core_samples_mask]
+            plt.scatter(xy[:, 0], xy[:, 1], s=50, c=[col], marker=u'o', alpha=0.5)
+
+            xy = self.X[class_member_mask & ~core_samples_mask]
+            plt.scatter(xy[:, 0], xy[:, 1], s=50, c=[col], marker=u'x', alpha=0.5)
+
+        plt.title('DBSCAN Clustering')
+        plt.xlabel('X')
+        plt.ylabel('Y')
+        plt.show()
 
     def find_density_max_point_indices(self):
         # 获取核心点的索引

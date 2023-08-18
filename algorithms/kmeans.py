@@ -8,6 +8,8 @@ Create on 2020/9/28 4:13 下午
 import logging
 import time
 
+import umap
+from sklearn.manifold import TSNE
 from sklearn.pipeline import make_pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer, HashingVectorizer, TfidfTransformer
 from sklearn.decomposition import TruncatedSVD, PCA
@@ -155,6 +157,34 @@ class KMEANS:
         # # plt.scatter(centroids[:, 0], centroids[:, 1], marker='x', color='r')
         # plt.show()
         return self.X, centroids, labels
+
+    def draw_new(self, decomposition_metch="pca"):
+        if decomposition_metch == "umap":
+            reducer = umap.UMAP(random_state=42)
+            X = reducer.fit_transform(self.X)
+        elif decomposition_metch == "tsne":
+            tsne = TSNE(n_components=2)
+            X = tsne.fit_transform(self.X)
+        elif decomposition_metch == "pca":
+            pca = PCA(n_components=2)
+            X = pca.fit_transform(self.X)
+        elif decomposition_metch == "svd":
+            svd = TruncatedSVD(2)
+            # # normalizer = Normalizer(copy=False)
+            # # lsa = make_pipeline(svd, normalizer)
+            X = svd.fit_transform(self.X)
+            # explained_variance = svd.explained_variance_ratio_.sum()
+            # logger.info("Explained variance of the SVD step: {}%".format(int(explained_variance * 100)))
+
+        # 获取聚类中心和预测的标签
+        centroids = self.km.cluster_centers_
+        labels = self.km.labels_
+        # # 绘制数据点和聚类中心
+        plt.scatter(X[:, 0], X[:, 1], c=labels)
+        plt.title(decomposition_metch)
+        # # plt.scatter(centroids[:, 0], centroids[:, 1], marker='x', color='r')
+        plt.show()
+        return X, centroids, labels
 
     def find_closest_samples(self):
         # 获取每个簇的中心点

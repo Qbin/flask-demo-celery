@@ -125,7 +125,9 @@ class Data:
         """ 加载数据集，假设数据集有两列，分别是人工标注的标签列和数据列 """
         src_df = pd.read_excel(self.data_path, engine='openpyxl', )
 
-        self.df = src_df[[self.field_name]].rename(columns={self.field_name: "data"})
+        # self.df = src_df[[self.field_name]].rename(columns={self.field_name: "data"})
+        self.df = src_df[[self.field_name]].rename(columns={self.field_name: "data"}).dropna()
+
         # newdf = pd.DataFrame(np.repeat(self.df.values, 1, axis=0))
         # newdf.columns = self.df.columns
         # self.df = newdf
@@ -139,7 +141,8 @@ class Data:
 
     @calculate_runtime
     def data_cut(self, datas=None):
-        if datas.empty:
+        # if datas.empty:
+        if not datas:
             datas = self.df["data"]
         self.jieba_add_keywords()
         logger.info("对数据集进行清洗并分词，请稍后 ...")

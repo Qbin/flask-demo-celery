@@ -23,6 +23,13 @@ import numpy as np
 from algorithms.config import *
 from common.time_cost import calculate_runtime
 
+import gensim
+
+# 加载预训练的Word2Vec模型
+# wv_model = gensim.models.KeyedVectors.load_word2vec_format(
+#     '/Users/qinbinbin/Documents/llm_test/models/worr2vec/news_12g_baidubaike_20g_novel_90g_embedding_64.bin',
+#     binary=True)
+
 
 class KMEANS:
     """ KMeans 文本聚类算法 """
@@ -53,6 +60,40 @@ class KMEANS:
         self.use_idf = use_idf
         self.is_draw = is_draw
         self.text2vec()
+        # self.word_2_vec()
+
+    @calculate_runtime
+    def word_2_vec(self):
+        """Generate vectors for list of documents using a Word Embedding
+
+        Args:
+            list_of_docs: List of documents
+            model: Gensim's Word Embedding
+
+        Returns:
+            List of document vectors
+        """
+        model = wv_model
+        features = []
+        list_of_docs = self.texts
+
+        for tokens in list_of_docs:
+            zero_vector = np.zeros(model.vector_size)
+            vectors = []
+            for token in tokens:
+                if token in model:
+                    try:
+                        vectors.append(model[token])
+                    except KeyError:
+                        continue
+            if vectors:
+                vectors = np.asarray(vectors)
+                avg_vec = vectors.mean(axis=0)
+                features.append(avg_vec)
+            else:
+                features.append(zero_vector)
+        self.X = features
+        return features
 
     @calculate_runtime
     def text2vec(self):

@@ -91,14 +91,12 @@ def main(file_name, field_name, num_clusters=3):
     model = kmeans.train()
     # joblib.dump(model, MODEL_KMEANS)
 
-    kmeans.print_top_terms()
+    # kmeans.print_top_terms()
     kmeans.draw_new("pca")
     result = list(model.labels_)
     print(dict([(i, result.count(i)) for i in result]))
 
 
 if __name__ == '__main__':
-    # main(file_name="/Users/qinbinbin/Documents/project/flask-demo-celery/algorithms/test/output.xlsx",
-    #      field_name="正文",num_clusters=8)
-    main(file_name="/Users/qinbinbin/Documents/project/flask-demo-celery/algorithms/test/thucnews.xlsx",
-         field_name="content", num_clusters=14)
+    main(file_name="output.xlsx", field_name="正文", num_clusters=8)
+    # main(file_name="thucnews.xlsx", field_name="content", num_clusters=14)

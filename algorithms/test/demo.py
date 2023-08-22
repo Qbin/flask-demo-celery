@@ -89,14 +89,21 @@ def main(file_name, field_name, num_clusters=3):
     corpus = [' '.join(line) for line in texts]
     kmeans = KMEANS(corpus, num_clusters=num_clusters)
     model = kmeans.train()
+    kmeans.print_silhouette_values()
+    kmeans.print_top_terms(10)
     # joblib.dump(model, MODEL_KMEANS)
 
     # kmeans.print_top_terms()
     kmeans.draw_new("pca")
+    # kmeans.draw_new("svd")
+    # kmeans.draw_new("tsne")
+    # kmeans.draw_new("umap")
     result = list(model.labels_)
+    print(result)
     print(dict([(i, result.count(i)) for i in result]))
 
 
 if __name__ == '__main__':
-    main(file_name="output.xlsx", field_name="正文", num_clusters=8)
-    # main(file_name="thucnews.xlsx", field_name="content", num_clusters=14)
+    # main(file_name="output.xlsx", field_name="正文", num_clusters=8)
+    # main(file_name="../../logs/test.xlsx", field_name="正文", num_clusters=3)
+    main(file_name="thucnews.xlsx", field_name="content", num_clusters=8)

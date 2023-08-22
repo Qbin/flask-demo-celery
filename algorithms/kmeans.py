@@ -17,6 +17,7 @@ from sklearn.preprocessing import Normalizer
 from sklearn.cluster import MiniBatchKMeans, KMeans
 from sklearn import metrics
 from sklearn.metrics.pairwise import euclidean_distances
+from sklearn.metrics import silhouette_samples, silhouette_score
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -27,7 +28,7 @@ import gensim
 
 # 加载预训练的Word2Vec模型
 # wv_model = gensim.models.KeyedVectors.load_word2vec_format(
-#     '/Users/qinbinbin/Documents/llm_test/models/worr2vec/news_12g_baidubaike_20g_novel_90g_embedding_64.bin',
+#     '/Users/qinbinbin/Documents/llm_test/models/worr2vec/pre_model/news12g_bdbk20g_nov90g_dim128/news12g_bdbk20g_nov90g_dim128.bin',
 #     binary=True)
 
 
@@ -141,6 +142,38 @@ class KMEANS:
         self.km.fit(self.X)
         return self.km
 
+    def print_silhouette_values(self):
+        """
+        打印kmeans的评估数据
+        """
+        X = self.X
+        km = self.km
+
+        print(f"For n_clusters = {self.num_clusters}")
+        print(f"Silhouette coefficient: {silhouette_score(X, km.labels_):0.2f}")
+        print(f"Inertia:{km.inertia_}")
+        sample_silhouette_values = silhouette_samples(X, km.labels_)
+        print(f"Silhouette values:")
+        silhouette_values = []
+        for i in range(self.num_clusters):
+            cluster_silhouette_values = sample_silhouette_values[km.labels_ == i]
+            silhouette_values.append(
+                (
+                    i,
+                    cluster_silhouette_values.shape[0],
+                    cluster_silhouette_values.mean(),
+                    cluster_silhouette_values.min(),
+                    cluster_silhouette_values.max(),
+                )
+            )
+        silhouette_values = sorted(
+            silhouette_values, key=lambda tup: tup[2], reverse=True
+        )
+        for s in silhouette_values:
+            print(
+                f"    Cluster {s[0]}: Size:{s[1]} | Avg:{s[2]:.2f} | Min:{s[3]:.2f} | Max: {s[4]:.2f}"
+            )
+
     def print_top_terms(self, top_n=10):
         if not self.use_hashing:
             if not self.km:
@@ -163,6 +196,35 @@ class KMEANS:
             return cluster_top_n
         else:
             logger.warning("hash 编码方式不支持该方法")
+
+    def print_top_terms_wv(self, top_n=10):
+        """
+        打印word2vec的质心点最相似数据
+        """
+        print("Top terms per cluster (based on centroids):")
+        for i in range(self.num_clusters):
+            tokens_per_cluster = ""
+            most_representative = wv_model.most_similar(positive=[self.km.cluster_centers_[i]], topn=top_n)
+            for t in most_representative:
+                tokens_per_cluster += f"{t[0]} "
+            print(f"Cluster {i}: {tokens_per_cluster}")
+
+    def print_most_representative_documents_wv(self):
+        """
+        打印word2vec最具代表性的数据集（分词后）
+        """
+        # test_cluster = 29
+        for i in range(self.num_clusters):
+            vectorized_docs = self.X
+            clustering = self.km
+            docs = self.texts
+            most_representative_docs = np.argsort(
+                np.linalg.norm(vectorized_docs - clustering.cluster_centers_[i], axis=1)
+            )
+            for d in most_representative_docs[:10]:
+                print("cluster {}".format(i))
+                print(docs[d])
+                print("-------------")
 
     def print_summary(self, labels=None):
         """ labels 为该数据集的真实类别标签，真实数据可能不存在该标签，因此部分指标可能不可用 """

@@ -15,7 +15,7 @@ Create on 2020/9/28 4:13 下午
 """
 import logging
 
-import umap
+# import umap
 from sklearn.manifold import TSNE
 from sklearn.pipeline import make_pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer

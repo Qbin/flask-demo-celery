@@ -23,8 +23,7 @@ class BaseConfig:
     result_backend = "redis://:123456@127.0.0.1:8723/10"
 
     MONGODB_SETTINGS = {
-        # "host": "mongodb://mongo:73c74b9461f00453@10.220.139.135:7830/prophet_k8s_test?authSource=admin",
-        "host": "mongodb://127.0.0.1:27017/prophet_k8s_test",
+        "host": "mongodb://mongo:27017/prophet_k8s_test",
     }
 
     # redis

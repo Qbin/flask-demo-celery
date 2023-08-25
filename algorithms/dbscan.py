@@ -64,14 +64,14 @@ class Dbscan:
     @calculate_runtime
     def text2vec(self):
         """ 文本向量化表示 """
-        self.vectorizer = TfidfVectorizer(max_df=0.5, min_df=2, use_idf=self.use_idf)
+        self.vectorizer = TfidfVectorizer(max_features=self.n_features, max_df=0.5, min_df=2, use_idf=self.use_idf)
         self.X = self.vectorizer.fit_transform(self.texts)
         logger.info("n_samples: %d, n_features: %d" % self.X.shape)
 
-        self.svd = TruncatedSVD(self.n_components)
-        # normalizer = Normalizer(copy=False)
-        # lsa = make_pipeline(self.svd, normalizer)
-        lsa = make_pipeline(self.svd)
+        self.svd = TruncatedSVD(self.n_components, algorithm='arpack')
+        normalizer = Normalizer(copy=False)
+        lsa = make_pipeline(self.svd, normalizer)
+        # lsa = make_pipeline(self.svd)
         self.X = lsa.fit_transform(self.X)
         explained_variance = self.svd.explained_variance_ratio_.sum()
         logger.info("Explained variance of the SVD step: {}%".format(int(explained_variance * 100)))
@@ -186,7 +186,6 @@ class Dbscan:
         # # plt.scatter(centroids[:, 0], centroids[:, 1], marker='x', color='r')
         plt.show()
         return X, "centroids", labels
-
 
     def draw_new(self):
         # 获取核心点的索引

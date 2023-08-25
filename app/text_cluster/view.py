@@ -60,10 +60,11 @@ def gen_cluster():
     cluster_type = params.get("cluster_type", "kmeans")
     cluster_params = params.get("cluster_params", None)
     dim = params.get("dim", 100)
+    draw_mode = params.get("draw_mode", "pca")
 
     # todo 根据a_id和data_indexes获取数据
     tcc = TextClusterController()
-    result, _ = tcc.gen_cluster(data_indexes, cluster_type, cluster_params, field_name, dim=dim)
+    result, _ = tcc.gen_cluster(data_indexes, cluster_type, cluster_params, field_name, dim=dim, draw_mode=draw_mode)
     return result
 
 

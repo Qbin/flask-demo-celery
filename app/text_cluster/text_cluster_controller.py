@@ -31,6 +31,7 @@ class TextClusterController:
     is_draw: bool = False
     field_name: str = None
     dim: int = 100
+    draw_mode: str = "pca"
 
     def __init__(self):
         pass
@@ -99,10 +100,11 @@ class TextClusterController:
         model_id = self.save_model(model, cluster_params)
         cluster_keywords = kmeans.print_top_terms()
         nearest_points = kmeans.find_closest_samples()
-        kmeans.draw()
+        # kmeans.draw()
+        X, centroids, labels = kmeans.draw_new(self.draw_mode)
 
         return {"model_id": model_id, "nearest_points": nearest_points, "cluster_keywords": cluster_keywords,
-                "X": kmeans.X.tolist(), "labels": kmeans.km.labels_.tolist()}, kmeans
+                "X": X.tolist(), "labels": labels.tolist()}, kmeans
 
         # return kmeans.print_top_terms()
         # X, centroids, labels = kmeans.draw()
@@ -120,21 +122,22 @@ class TextClusterController:
         # kmeans.print_top_terms()
         nearest_points = None
         # nearest_points = kmeans.find_nearest_point()
-        dbscan.draw()
+        X, centroids, labels = dbscan.draw_new2(self.draw_mode)
         # todo 待完善
         nearest_points = dbscan.find_density_max_point_indices()
         logging.info("nearest_points: {}, labels: {} ".format(nearest_points, model.labels_))
 
         return {"model_id": model_id, "nearest_points": nearest_points,
-                "X": dbscan.X.tolist(), "labels": model.labels_.tolist()}, dbscan
+                "X": X.tolist(), "labels": labels.tolist()}, dbscan
 
         # return kmeans.print_top_terms()
         # X, centroids, labels = kmeans.draw()
         # return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}
 
-    def gen_cluster(self, data_indexes, cluster_type, cluster_params, field_name, dim=100):
+    def gen_cluster(self, data_indexes, cluster_type, cluster_params, field_name, dim=100, draw_mode="pca"):
         self.field_name = field_name
         self.dim = dim
+        self.draw_mode = draw_mode
         texts = self.get_analyzed_data(data_indexes)
         st = time.time()
         if os.getenv("DB_MODE") == "mongo":
@@ -157,14 +160,15 @@ class TextClusterController:
         self.field_name = model_obj.field_name
         if model_type == "kmeans":
             _, kmeans = self.gen_cluster(data_indexes, model_type, model_params, self.field_name)
-            X, centroids, labels = kmeans.draw()
+            X, centroids, labels = kmeans.draw_new("pca")
             cluster_keywords = kmeans.print_top_terms()
             nearest_points = kmeans.find_closest_samples()
             return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist(),
                     "nearest_points": nearest_points, "cluster_keywords": cluster_keywords}
         else:
             _, dbscan = self.gen_cluster(data_indexes, model_type, model_params, self.field_name)
-            X, centroids, labels = dbscan.draw()
+            # X, centroids, labels = dbscan.draw()
+            X, centroids, labels = dbscan.draw_new2(self.draw_mode)
             nearest_points = dbscan.find_density_max_point_indices()
             # logging.info("DBSCAN nearest_points: {}, labels: {} ".format(nearest_points, labels))
             # model_name = "{}.model".format(model_id)

@@ -119,7 +119,7 @@ class TextClusterController:
             raise ClusterError(ClusterError.TEXT2VEC, "向量化异常")
         model = dbscan.train()
         model_id = self.save_model(model, cluster_params, "dbscan")
-        # kmeans.print_top_terms()
+        cluster_keywords = dbscan.print_top_terms()
         nearest_points = None
         # nearest_points = kmeans.find_nearest_point()
         X, centroids, labels = dbscan.draw_new2(self.draw_mode)
@@ -127,7 +127,7 @@ class TextClusterController:
         nearest_points = dbscan.find_density_max_point_indices()
         logging.info("nearest_points: {}, labels: {} ".format(nearest_points, model.labels_))
 
-        return {"model_id": model_id, "nearest_points": nearest_points,
+        return {"model_id": model_id, "nearest_points": nearest_points, "cluster_keywords": cluster_keywords,
                 "X": X.tolist(), "labels": labels.tolist()}, dbscan
 
         # return kmeans.print_top_terms()

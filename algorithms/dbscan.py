@@ -59,6 +59,7 @@ class Dbscan:
         self.use_hashing = use_hashing
         self.use_idf = use_idf
         self.is_draw = is_draw
+        self.vec_X = None
         self.text2vec()
 
     @calculate_runtime
@@ -66,6 +67,7 @@ class Dbscan:
         """ 文本向量化表示 """
         self.vectorizer = TfidfVectorizer(max_features=self.n_features, max_df=0.5, min_df=2, use_idf=self.use_idf)
         self.X = self.vectorizer.fit_transform(self.texts)
+        self.vec_X = self.X
         logger.info("n_samples: %d, n_features: %d" % self.X.shape)
 
         self.svd = TruncatedSVD(self.n_components, algorithm='arpack')
@@ -83,28 +85,29 @@ class Dbscan:
         return self.dbscan
 
     def print_top_terms(self, top_n=10):
-        return
-        if not self.use_hashing:
-            if not self.km:
-                _ = self.train()
-            logger.info("Top terms per cluster:")
-            if self.n_components:
-                original_space_centroids = self.svd.inverse_transform(self.km.cluster_centers_)
-                order_centroids = original_space_centroids.argsort()[:, ::-1]
-            else:
-                order_centroids = self.km.cluster_centers_.argsort()[:, ::-1]
+        # 找出每个簇的关键词
+        keywords = []
+        labels = self.dbscan.labels_
+        for label in set(labels):
+            if label == -1:
+                continue
 
-            terms = self.vectorizer.get_feature_names()
-            cluster_top_n = []
-            for i in range(self.num_clusters):
-                res = []
-                for ind in order_centroids[i, :top_n]:
-                    res.append(terms[ind])
-                logger.info("Cluster {}: {}".format(i, " ".join(res)))
-                cluster_top_n.append(res)
-            return {"cluster_top_n": cluster_top_n}
-        else:
-            logger.warning("hash 编码方式不支持该方法")
+            # 获取属于当前簇的样本点的索引
+            indices = [i for i, l in enumerate(labels) if l == label]
+
+            # 计算当前簇的TF-IDF特征向量的均值
+            cluster_mean = self.vec_X[indices].mean(axis=0)
+
+            # 找到均值向量中最重要的特征的索引
+            top_feature_indices = cluster_mean.A.ravel().argsort()[::-1][:top_n]
+
+            # 获取对应的关键词
+            keywords.append([self.vectorizer.get_feature_names()[i] for i in top_feature_indices])
+
+        # 打印每个簇的关键词
+        for i, k in enumerate(keywords):
+            print(f"Cluster {i + 1} keywords: {', '.join(k)}")
+        return keywords
 
     def draw(self):
         # Get cluster labels

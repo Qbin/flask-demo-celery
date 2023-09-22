@@ -158,7 +158,7 @@ class KMEANS:
         # plt.show()
         return self.X, centroids, labels
 
-    def draw_new(self, decomposition_metch="pca"):
+    def draw_new(self, decomposition_metch="pca", scaled_n=10):
         if decomposition_metch == "umap":
             reducer = umap.UMAP(random_state=42)
             X = reducer.fit_transform(self.X)
@@ -179,6 +179,26 @@ class KMEANS:
         # 获取聚类中心和预测的标签
         centroids = self.km.cluster_centers_
         labels = self.km.labels_
+
+        X_scaled = X
+        n = scaled_n
+        # 缩放簇内坐标
+        X_scaled_clustered = np.zeros_like(X_scaled)
+        for i in range(len(X_scaled)):
+            cluster_label = labels[i]
+            center = centroids[cluster_label]
+
+            x = X_scaled[i, 0]
+            y = X_scaled[i, 1]
+
+            # 缩放公式
+            x_scaled_clustered = (x - center[0]) / n + center[0]
+            y_scaled_clustered = (y - center[1]) / n + center[1]
+
+            X_scaled_clustered[i] = [x_scaled_clustered, y_scaled_clustered]
+
+        X = X_scaled_clustered
+
         # # 绘制数据点和聚类中心
         # plt.scatter(X[:, 0], X[:, 1], c=labels)
         # plt.title(decomposition_metch)

@@ -32,6 +32,7 @@ class TextClusterController:
     field_name: str = None
     dim: int = 100
     draw_mode: str = "pca"
+    scaled_n: int = 10
 
     def __init__(self):
         pass
@@ -101,7 +102,7 @@ class TextClusterController:
         cluster_keywords = kmeans.print_top_terms()
         nearest_points = kmeans.find_closest_samples()
         # kmeans.draw()
-        X, centroids, labels = kmeans.draw_new(self.draw_mode)
+        X, centroids, labels = kmeans.draw_new(self.draw_mode, scaled_n=self.scaled_n)
 
         return {"model_id": model_id, "nearest_points": nearest_points, "cluster_keywords": cluster_keywords,
                 "X": X.tolist(), "labels": labels.tolist()}, kmeans
@@ -134,10 +135,12 @@ class TextClusterController:
         # X, centroids, labels = kmeans.draw()
         # return {"X": X.tolist(), "centroids": centroids.tolist(), "labels": labels.tolist()}
 
-    def gen_cluster(self, data_indexes, cluster_type, cluster_params, field_name, dim=100, draw_mode="pca"):
+    def gen_cluster(self, data_indexes, cluster_type, cluster_params, field_name, dim=100, draw_mode="pca",
+                    scaled_n=10):
         self.field_name = field_name
         self.dim = dim
         self.draw_mode = draw_mode
+        self.scaled_n = scaled_n
         texts = self.get_analyzed_data(data_indexes)
         st = time.time()
         if os.getenv("DB_MODE") == "mongo":

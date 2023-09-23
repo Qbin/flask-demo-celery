@@ -61,10 +61,12 @@ def gen_cluster():
     cluster_params = params.get("cluster_params", None)
     dim = params.get("dim", 100)
     draw_mode = params.get("draw_mode", "pca")
+    scaled_n = params.get("scaled_n", 10)
 
     # todo 根据a_id和data_indexes获取数据
     tcc = TextClusterController()
-    result, _ = tcc.gen_cluster(data_indexes, cluster_type, cluster_params, field_name, dim=dim, draw_mode=draw_mode)
+    result, _ = tcc.gen_cluster(data_indexes, cluster_type, cluster_params, field_name, dim=dim, draw_mode=draw_mode,
+                                scaled_n=scaled_n)
     return result
 
 
@@ -90,5 +92,5 @@ def is_seg_data():
     result = tcc.is_seg_data(data_indexes, field_name)
     return {
         "is_seg_data": result,
-        "un_seg_data": list(set(data_indexes)- set(result))
+        "un_seg_data": list(set(data_indexes) - set(result))
     }

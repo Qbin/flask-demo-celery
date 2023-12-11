@@ -33,17 +33,17 @@ class ServiceDecorator(BaseDecorator):
         except BaseError as e:
             logging.exception(e)
             logging.error(e.args)
-            return e
+            raise e
         except UnicodeDecodeError as e:
             logging.exception(e)
             logging.error(e.args)
-            return BaseError(
+            raise BaseError(
                 BaseError.INTERNAL_ERROR,
                 'Prophet only supports GBK and UTF-8 encoding format, please transform file format')
         except Exception as e:
             logging.exception(e)
             logging.error(e.args)
-            return BaseError(BaseError.INTERNAL_ERROR, 'Prophet System error')
+            raise BaseError(BaseError.INTERNAL_ERROR, 'Prophet System error')
 
         if result is None:
             copy_result = result = {}

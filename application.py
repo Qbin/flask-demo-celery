@@ -16,8 +16,11 @@ from flask_log_request_id import RequestID
 
 from config import config
 from config.logger import config_logger
-from common.custom_response import ProphetResponse
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from common.response_handler import handle_exception, custom_response
+
+# from common.custom_response import ProphetResponse
+# from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+
 
 
 def register_logger():
@@ -82,6 +85,22 @@ def init_celery(celery, app):
     celery.Task = ContextTask
 
 
+def create_response_handler(app):
+    @app.errorhandler(Exception)
+    def handle_all_exceptions(e):
+        return handle_exception(e)
+
+    @app.after_request
+    def process_response(response):
+        res_json = response.get_json()
+        if res_json is not None and "data" in res_json.keys() and "context" in res_json.keys():
+            return response
+        if isinstance(response.get_data(), bytes):
+            return custom_response(response.get_data(), response.status_code)
+
+        return response
+
+
 def create_app_by_config(conf=None, **kwargs):
     # initialize logger
     register_logger()
@@ -105,7 +124,8 @@ def create_app_by_config(conf=None, **kwargs):
         create_mongo(app)
         create_redis(app)
         RequestID(app)
-        app.response_class = ProphetResponse
+        # app.response_class = ProphetResponse
+        create_response_handler(app)
         CORS(app, supports_credentials=True)
         if kwargs.get('celery'):
             init_celery(kwargs['celery'], app)
